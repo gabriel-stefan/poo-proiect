@@ -1,4 +1,4 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+Movie Booking System
 
 ### Important!
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar în folder-ul `generated`.
@@ -14,7 +14,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar ca o serie
 
 ### Tema 0
 
-- [ ] Nume proiect (poate fi schimbat ulterior)
+- [X] Nume proiect (poate fi schimbat ulterior)
 - [ ] Scurtă descriere a temei alese, ce v-ați propus să implementați
 
 ## Tema 1
