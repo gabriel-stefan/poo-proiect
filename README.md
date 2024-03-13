@@ -1,6 +1,6 @@
 ### Movie Booking System
 
-Movie Booking System este un sistem ce permite userilor sa rezerve locuri la cinema. 
+Movie Booking System este un sistem ce permite userilor sa rezerve locuri la cinema. Userii pot alege la ce film doresc sa mearga, sa isi rezerve locurile si sa aleage modalitatea de plata preferata.
 
 ### Important!
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar în folder-ul `generated`.
@@ -17,7 +17,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar ca o serie
 ### Tema 0
 
 - [X] Nume proiect (poate fi schimbat ulterior)
-- [ ] Scurtă descriere a temei alese, ce v-ați propus să implementați
+- [X] Scurtă descriere a temei alese, ce v-ați propus să implementați
 
 ## Tema 1
 
