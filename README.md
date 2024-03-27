@@ -29,13 +29,13 @@ O cerință nu se consideră îndeplinită dacă este realizată doar ca o serie
 <!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
 - [X] `operator<<` pentru toate clasele pentru afișare (std::ostream)
 - [X] cât mai multe `const` (unde este cazul)
-- [ ] implementarea a minim 3 funcții membru publice pentru funcționalități specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
+- [X] implementarea a minim 3 funcții membru publice pentru funcționalități specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
   - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
-- [ ] scenariu de utilizare a claselor definite:
+- [X] scenariu de utilizare a claselor definite:
   - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
   - vor fi adăugate în fișierul `tastatura.txt` DOAR exemple de date de intrare de la tastatură (dacă există); dacă aveți nevoie de date din fișiere, creați alte fișiere separat
 - [X] tag de `git`: de exemplu `v0.1`
-- [ ] serviciu de integrare continuă (CI); exemplu: GitHub Actions
+- [X] serviciu de integrare continuă (CI); exemplu: GitHub Actions
 
 ## Tema 2
 
