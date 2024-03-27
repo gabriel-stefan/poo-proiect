@@ -35,6 +35,18 @@ public:
         os << "Username: " << other.username << ", Parola: " << other.parola << "\n";
         return os;
     }
+
+    void setUsername(const std::string& usernameNou) {
+        username = usernameNou;
+    }
+
+    void setPassword(const std::string& parolaNoua) {
+        parola = parolaNoua;
+    }
+
+    bool checkLogin(const std::string& username, const std::string& parola) {
+        return (username == "admin" && parola == "parola123");
+    }
 };
 
 class Actor{
@@ -106,17 +118,31 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Film& other) {
         os << "Nume film: " << other.nume << ", Durata: " << other.durata << "\n";
         os << "Actori: ";
-        for (const std::string& actor : other.cast) {
-            os << actor << ", ";
-        }
+        //for (const std::string& actor : other.cast) {
+        //    os << actor << ", ";
+        //}
         return os;
     }
 };
 
 int main() {
 
-    Actor ac("Mihai", 12, {"Palm Angels", "Miron"});
-    Actor ab;
+    User prim;
+    std::cout << "Conectare\n" << "Username:";
+    std::string username, parola;
+    std::cin >> username;
+    std::cout << "Parola:";
+    std::cin >> parola;
+    prim.setUsername(username);
+    prim.setPassword(parola);
+    bool valid =  prim.checkLogin(username, parola);
+
+    if(valid == 0) {
+        std::cout << "Datele de conectare nu sunt corecte!";
+    }
+    else {
+        
+    }
     return 0;
 }
 
