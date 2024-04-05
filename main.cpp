@@ -121,10 +121,6 @@ public:
         return os;
     }
 
-    int getBalanta() const {
-        return suma;
-    }
-
 };
 
 class User{
@@ -132,11 +128,11 @@ private:
     std::string username;
     std::string parola;
     Balanta balanta;
-    std::string categorie;
+    bool categorie;
 public:
     User() = default;
 
-    User(const std::string& _username, const std::string& _parola, const Balanta& _balanta, const std::string& _categorie)
+    User(const std::string& _username, const std::string& _parola, const Balanta& _balanta, const bool& _categorie)
         :username(_username), parola(_parola), balanta(_balanta), categorie(_categorie)
     {}
 
@@ -172,11 +168,15 @@ public:
     }
 
     bool checkLogin(const std::string& _username, const std::string& _parola) {
-        return ("admin" == _username && "parola123" == _parola);
+        return (username == _username && parola == _parola);
+    }
+
+    void setCategorie(bool categorieNoua) {
+        categorie = categorieNoua;
     }
 
     void reducere(Film& film) {
-        if (categorie == "student" && film.getPret() > 20) {
+        if (categorie == true && film.getPret() > 20) {
             film.setPret(15);
             std::cout << "Biletul a fost redus la 15 lei deoarece esti student." << std::endl;
         }
@@ -185,17 +185,26 @@ public:
 };
 
 
-
 int main() {
 
     User prim("admin","parola123", 150, "student");
-    std::cout << "Conectare\n" << "Username:";
+    prim.setCategorie(false);
+
+    std::cout << "Bun venit la Movie Booking System! Te rog sa iti creezi un cont!\n";
+    std::cout << "Username:";
     std::string username, parola;
     std::cin >> username;
     std::cout << "Parola:";
     std::cin >> parola;
     prim.setUsername(username);   //username-ul e admin si parola parola123
     prim.setPassword(parola);
+    std::cout << "\n";
+
+    std::cout << "Te rog sa te conectezi!\n";
+    std::cout << "Username:";
+    std::cin >> username;
+    std::cout << "Parola:";
+    std::cin >> parola;
     bool valid =  prim.checkLogin(username, parola);
 
     Actor brad("Brad Pitt", 60, {"Once Upon a Time... in Hollywood", "Fight Club", "Fury"});
@@ -221,30 +230,79 @@ int main() {
     films.push_back(opp);
 
     if(valid == 0) {
-        std::cout << "Datele de conectare nu sunt corecte!";
-    }
-    else {
-        std::cout << "Te-ai conectat cu succes!\n\n";
-        std::cout << "Alegi ce vrei sa faci:\n1. Alege un film\n\n"; //urmeaza sa fie adaugate mai multe lucruri (adauga o metoda de plata, schimba cinema-ul etc.)
-
-        for (size_t i = 0; i < films.size(); ++i) {
-            std::cout << i + 1 << ". " << films[i] << "\n\n";
+        while (valid == 0) {
+            std::cout << "\nDatele de conectare nu sunt corecte!\n";
+            std::cout << "Doresti sa incerci din nou? [y/n]";
+            std::string alegere;
+            std::cin >> alegere;
+            std::cout << "\n";
+            if (alegere == "y") {
+                std::cout << "Te rog sa te conectezi!\n";
+                std::cout << "Username:";
+                std::cin >> username;
+                std::cout << "Parola:";
+                std::cin >> parola;
+                valid = prim.checkLogin(username, parola);
+            } else {
+                return 0;
+            }
         }
+    }
 
-        size_t nr = films.size();
+    std::cout << "Te-ai conectat cu succes!\n\n";
 
-        std::cout << "Alege un film pentru care vrei sa cumperi bilet:\n";
+    bool ok = true;
+    while(ok) {
+        std::cout << "Alegi ce vrei sa faci:\n1. Alege un film\n2. Actualizeaza categoria\n3. Gestioneaza balata\n"; //urmeaza sa fie adaugate mai multe lucruri (adauga o metoda de plata, schimba cinema-ul etc.)
+        std::cout << "[Introdu un numar]:";
+        std::string alegere;
+        std::cin >> alegere;
+        std::cout << '\n';
 
-        size_t numar_selectat;
-        std::cin >> numar_selectat;
+        if (alegere == "1") {
 
-        if(numar_selectat > nr) {
-            std::cout << "Ai ales un numar prea mare care nu corespunde niciunui film!\n";
-            return 0;
+            for (size_t i = 0; i < films.size(); ++i) {
+                std::cout << i + 1 << ". " << films[i] << "\n\n";
+            }
+
+            size_t nr = films.size();
+
+            std::cout << "Alege un film pentru care vrei sa cumperi bilet:\n";
+
+            size_t numar_selectat;
+            std::cin >> numar_selectat;
+
+            if (numar_selectat > nr) {
+                std::cout << "Ai ales un numar prea mare care nu corespunde niciunui film!\n";
+                return 0;
+            } else {
+                prim.reducere(films[numar_selectat - 1]);
+                std::cout
+                        << "Felicitari! Ai cumparat bilet!\n";  //mai trebuie verificat daca sunt bani suficienti si un update la balanta
+            }
+        } else if (alegere == "2") {
+            std::cout << "Esti student sau pensionar? [y/n]";
+            std::string raspuns;
+            std::cin >> raspuns;
+            if (raspuns == "y") {
+                prim.setCategorie(true);
+                std::cout << "Beneficiezi de reduceri la filmele care sunt mai scumpe de 20 RON!\n";
+            } else {
+                prim.setCategorie(false);
+                std::cout << "Nu beneficiezi de reducere.\n";
+            }
+        }
+        else if (alegere == "3") {
+            std::cout << "Balanta curenta: " <<
+        }
+        std::cout << "\nDoresti sa mai faci ceva? [y/n]";
+        std::cin >> alegere;
+        std::cout << "\n";
+        if(alegere == "y"){
+            ok = true;
         }
         else{
-            prim.reducere(films[numar_selectat-1]);
-            std::cout << "Felicitari! Ai cumparat bilet!\n";  //mai trebuie verificat daca sunt bani suficienti si un update la balanta
+            ok = false;
         }
     }
     return 0;
