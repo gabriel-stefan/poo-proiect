@@ -114,7 +114,15 @@ public:
         suma = other.suma;
     }
 
+    int getSuma() const {
+        return suma;
+    }
+
     ~Balanta(){}
+
+    void adaugaSuma(int sumaAdaugata) {
+        suma += sumaAdaugata;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Balanta& other) {
         os << "Balanta: " << other.suma << "\n";
@@ -180,6 +188,14 @@ public:
             film.setPret(15);
             std::cout << "Biletul a fost redus la 15 lei deoarece esti student." << std::endl;
         }
+    }
+
+    int getBalanta() const {
+        return balanta.getSuma();
+    }
+
+    void adaugaInBalanta(int sumaAdaugata) {
+        balanta.adaugaSuma(sumaAdaugata);
     }
 
 };
@@ -293,7 +309,12 @@ int main() {
             }
         }
         else if (alegere == "3") {
-            std::cout << "Balanta curenta: " <<
+            std::cout << "Balanta curenta: " << prim.getBalanta() << "\n";
+            std::cout << "Introdu suma pe care vrei sa o adaugi in balanta:";
+            int sumaAdaugata;
+            std::cin >> sumaAdaugata;
+            prim.adaugaInBalanta(sumaAdaugata);
+            std::cout << "Noua balanta: " << prim.getBalanta() << "\n";
         }
         std::cout << "\nDoresti sa mai faci ceva? [y/n]";
         std::cin >> alegere;
