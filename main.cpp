@@ -198,12 +198,16 @@ public:
         balanta.adaugaSuma(sumaAdaugata);
     }
 
+    bool areBani(int pretBilet) const {
+        return balanta.getSuma() >= pretBilet;
+    }
+
 };
 
 
 int main() {
 
-    User prim("admin","parola123", 150, "student");
+    User prim("admin","parola123", 15, "student");
     prim.setCategorie(false);
 
     std::cout << "Bun venit la Movie Booking System! Te rog sa iti creezi un cont!\n";
@@ -290,11 +294,15 @@ int main() {
 
             if (numar_selectat > nr) {
                 std::cout << "Ai ales un numar prea mare care nu corespunde niciunui film!\n";
-                return 0;
             } else {
-                prim.reducere(films[numar_selectat - 1]);
-                std::cout
-                        << "Felicitari! Ai cumparat bilet!\n";  //mai trebuie verificat daca sunt bani suficienti si un update la balanta
+                if (prim.areBani(films[numar_selectat - 1].getPret())) {
+                    prim.reducere(films[numar_selectat - 1]);
+                    std::cout << "Felicitari! Ai cumparat bilet!\n";
+                    prim.adaugaInBalanta(-films[numar_selectat - 1].getPret());
+                    std::cout << "Balanta curenta: " << prim.getBalanta() << "\n";
+                } else {
+                    std::cout << "Nu ai suficienti bani pentru a cumpara biletul.\n";
+                }
             }
         } else if (alegere == "2") {
             std::cout << "Esti student sau pensionar? [y/n]";
