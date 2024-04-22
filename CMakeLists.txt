@@ -139,6 +139,10 @@ set_custom_stdlib_and_sanitizers(${PROJECT_NAME} true)
 
 ###############################################################################
 
+add_subdirectory(ext/include/digestpp) # Add this line
+target_link_libraries(${PROJECT_NAME} PRIVATE digestpp) # And this line
+target_include_directories(${PROJECT_NAME} PRIVATE ext/include/digestpp) # And this line
+
 # use SYSTEM so cppcheck/clang-tidy does not report warnings from these directories
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE generated/include)
 # target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ext/<SomeHppLib>/include)
