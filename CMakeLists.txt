@@ -107,6 +107,7 @@ add_executable(${PROJECT_NAME}
     main.cpp
     generated/src/Helper.cpp
     env_fixes.h
+        ext/include/digestpp/digestpp.hpp
 )
 
 ###############################################################################
@@ -138,10 +139,6 @@ endif()
 set_custom_stdlib_and_sanitizers(${PROJECT_NAME} true)
 
 ###############################################################################
-
-add_subdirectory(ext/include/digestpp/digestpp.hpp) # Add this line
-target_link_libraries(${PROJECT_NAME} PRIVATE digestpp) # And this line
-target_include_directories(${PROJECT_NAME} PRIVATE ext/include/digestpp/digestpp.hpp) # And this line
 
 # use SYSTEM so cppcheck/clang-tidy does not report warnings from these directories
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE generated/include)

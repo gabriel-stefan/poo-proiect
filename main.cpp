@@ -1,52 +1,58 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <functional>
+//#include <functional>
+#include <fstream>
+//#include <digestpp.hpp> <---- nu pot sa rezolv aici
 //#include <thread>
 //#include <SFML/Graphics.hpp>
 //#include <Helper.h>
 //#include "env_fixes.h"
 
+//class PasswordManager {
+//public:
+//    static std::string make_salt() {
+//        static uint64_t nr = 1u;
+//        std::string salt;
+//        auto bytes = static_cast<char*>(static_cast<void*>(&nr));
+//        for(unsigned i = 0; i < 16; i++) {
+//            salt += bytes[i%8];
+//        }
+//        ++nr;
+//        return salt;
+//    }
+//
+//    static std::string hash_password(const std::string& plain, const std::string& salt) {
+//        return digestpp::blake2b(512).set_salt(salt).absorb(plain).hexdigest();
+//    }
+//};
+
 class Actor{
 private:
     std::string nume;
     int varsta;
-    std::vector<std::string> filmeJucate;
 public:
     Actor() = default;
 
-    Actor(const std::string& _nume, const int _varsta, const std::vector<std::string>& _filmeJucate)
-            :nume(_nume), varsta(_varsta), filmeJucate(_filmeJucate)
+    Actor(const std::string& _nume, const int _varsta)
+            :nume(_nume), varsta(_varsta)
     {}
 
     Actor& operator=(const Actor& other){
         nume = other.nume;
         varsta = other.varsta;
-        filmeJucate = other.filmeJucate;
         return *this;
     }
 
     Actor(const Actor& other)
-            : nume(other.nume), varsta(other.varsta), filmeJucate(other.filmeJucate)
+            : nume(other.nume), varsta(other.varsta)
     {}
 
     ~Actor(){}
 
     friend std::ostream& operator<<(std::ostream& os, const Actor& other) {
         os << other.nume << ", " << other.varsta << " ani ";
-        os << "[filme in care joaca: ";
-        for (auto it = other.filmeJucate.begin(); it != other.filmeJucate.end(); ++it) {
-            os << *it;
-            if (it != other.filmeJucate.end() - 1) {
-                os << ", ";
-            }
-        }
-        os << "]";
         return os;
-    }
-
-    std::string getNume() const {
-        return nume;
     }
 };
 
@@ -87,12 +93,6 @@ public:
             }
         }
         return os;
-    }
-
-    void afisFilme(const std::vector<Film>& filme) {
-        for (const Film& film : filme) {
-            std::cout << film << std::endl;
-        }
     }
 
     int getPret() const {
@@ -203,11 +203,20 @@ public:
     }
 
     void adaugaInBalanta(int sumaAdaugata) {
-        balanta.adaugaSuma(sumaAdaugata);
+        if (sumaAdaugata < 10 || sumaAdaugata > 500) {
+            std::cout << "Suma adaugata trebuie sa fie intre 10 si 500.\n";
+        } else {
+            balanta.adaugaSuma(sumaAdaugata);
+        }
     }
 
     bool areBani(int pretBilet) const {
         return balanta.getSuma() >= pretBilet;
+    }
+
+    void scadeDinBalanta(int sumaScaduta) {
+        balanta.adaugaSuma(-sumaScaduta);
+        std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
     }
 
 };
@@ -266,25 +275,64 @@ public:
     }
 
     void initializareFilme() {
-        Actor brad("Brad Pitt", 60, {"Once Upon a Time... in Hollywood", "Fight Club", "Fury"});
-        Actor leo("Leonardo DiCaprio", 49, {"The Wolf Of Wallstreet", "The Departed", "Once Upon a Time... in Hollywood"});
-        Actor matt("Matt Damon", 53, {"Good Will Hunting", "Oppenheimer"});
+        std::ifstream file("filme.csv");
 
-        Film hollywood("Once Upon A Time... in Hollywood", 162, 15, {brad, leo});
-        Film fight("Fight Club", 139, 20, {brad});
-        Film fury("Fury", 135, 18, {brad});
-        Film wolf("The Wolf Of Wallstreet", 180, 20, {leo});
-        Film departed("The Departed", 151, 25, {matt, leo});
-        Film will("Good Will Hunting", 127, 19,{matt});
-        Film opp("Oppenheimer", 181, 23, {matt});
+        if (!file.is_open()) {
+            std::cerr << "Nu s-a putut deschide fisierul'filme.csv'" << '\n';
+            return;
+        }
 
-        filme.push_back(hollywood);
-        filme.push_back(fight);
-        filme.push_back(fury);
-        filme.push_back(wolf);
-        filme.push_back(departed);
-        filme.push_back(will);
-        filme.push_back(opp);
+        std::string line;
+        while (std::getline(file, line)) {
+            std::stringstream ss(line);
+            std::string nume;
+            std::getline(ss, nume, ',');
+
+            std::string durataStr;
+            std::getline(ss, durataStr, ',');
+            int durata;
+            try {
+                durata = std::stoi(durataStr);
+            } catch (std::invalid_argument&) {
+                std::cerr << "Durata invalida: " << durataStr << '\n';
+                continue;
+            }
+
+            std::string pretStr;
+            std::getline(ss, pretStr, ',');
+            int pret;
+            try {
+                pret = std::stoi(pretStr);
+            } catch (std::invalid_argument&) {
+                std::cerr << "Pret invalid: " << pretStr << '\n';
+                continue;
+            }
+
+            std::vector<Actor> cast;
+            std::string actorsStr;
+            std::getline(ss, actorsStr);
+            std::stringstream ssActors(actorsStr);
+            std::string actorStr;
+            while (std::getline(ssActors, actorStr, ';')) {
+                std::stringstream ssActor(actorStr);
+                std::string nume;
+                std::getline(ssActor, nume, '-');
+                std::string varstaStr;
+                std::getline(ssActor, varstaStr);
+                int varsta;
+                try {
+                    varsta = std::stoi(varstaStr);
+                } catch (std::invalid_argument&) {
+                    std::cerr << "Varsta invalida: " << varstaStr << '\n';
+                    continue;
+                }
+                cast.push_back(Actor(nume, varsta));
+            }
+
+            filme.push_back(Film(nume, durata, pret, cast));
+        }
+
+        file.close();
     }
 
     void cumparaBiletFilm() {
@@ -305,28 +353,31 @@ public:
             if (user.areBani(filme[numar_selectat - 1].getPret())) {
                 user.reducere(filme[numar_selectat - 1]);
                 std::cout << "Felicitari! Ai cumparat bilet!\n";
-                user.adaugaInBalanta(-filme[numar_selectat - 1].getPret());
-                std::cout << "Balanta curenta: " << user.getBalanta() << "\n";
+                user.scadeDinBalanta(filme[numar_selectat - 1].getPret());
             } else {
                 std::cout << "Nu ai suficienti bani pentru a cumpara biletul.\n";
+                std::cout << "Balanta curenta: " << user.getBalanta() << "\n";
             }
         }
     }
 
     void selectareCategorie() {
-        std::cout << "Esti student sau pensionar? [y/n]";
+        std::cout << "Te incadrezi intr-o categorie speciala de varsta?(student/pensionar) [y/n]";
         std::string raspuns;
         std::cin >> raspuns;
         if (raspuns == "y") {
             user.setCategorie(true);
             std::cout << "Beneficiezi de reduceri la filmele care sunt mai scumpe de 20 RON!\n";
-        } else {
+        } else if (raspuns == "n"){
             user.setCategorie(false);
             std::cout << "Nu beneficiezi de reducere.\n";
         }
+        else{
+            std::cout << "Valoare invalida!\n";
+        }
     }
 
-    void manageriereBalanta() {
+    void gestionareBalanta() {
         std::cout << "Balanta curenta: " << user.getBalanta() << "\n";
         std::cout << "Introdu suma pe care vrei sa o adaugi in balanta:";
         int sumaAdaugata;
@@ -355,13 +406,20 @@ int main() {
         }
     }
 
-    bool ok = true;
-    while(ok) {
+    bool ruleaza = true;
+    while (ruleaza) {
         std::cout << "Alegi ce vrei sa faci:\n1. Alege un film\n2. Actualizeaza categoria\n3. Gestioneaza balata\n"; //urmeaza sa fie adaugate mai multe lucruri (adauga o metoda de plata, schimba cinema-ul etc.)
         std::cout << "[Introdu un numar]:";
         std::string alegere;
         std::cin >> alegere;
         std::cout << '\n';
+
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Valoare invalida, te rog incearca din nou.\n\n";
+            continue;
+        }
 
         if (alegere == "1") {
             app.cumparaBiletFilm();
@@ -369,21 +427,27 @@ int main() {
             app.selectareCategorie();
         }
         else if (alegere == "3") {
-            app.manageriereBalanta();
+            app.gestionareBalanta();
+        }
+        else {
+            std::cout << "Valoare invalida!\n";
+            continue;
         }
         std::cout << "\nDoresti sa mai faci ceva? [y/n]";
         std::cin >> alegere;
         std::cout << "\n";
         if(alegere == "y"){
-            ok = true;
+            ruleaza = true;
         }
-        else{
-            ok = false;
+        else if (alegere == "n"){
+            ruleaza = false;
+        }
+        else {
+            std::cout << "Valoare invalida!\n";
+            continue;
         }
     }
 
     return 0;
 }
 
-
-//vor mai fi adaugate clase cu sali, locuri, functii pentru adaugat filme, pentru schimbarea locului
