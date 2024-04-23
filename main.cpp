@@ -110,7 +110,7 @@ private:
 public:
     Balanta() = default;
 
-    Balanta(const int _suma)
+    explicit Balanta(const int _suma)
             :suma(_suma)
     {}
 
@@ -174,24 +174,11 @@ public:
         return os;
     }
 
-//    void setUsername(const std::string& usernameNou) {
-//        username = usernameNou;
-//    }
-//
-//    void setPassword(const std::string& parolaNoua) {
-//        std::hash<std::string> hasher;
-//        parola = std::to_string(hasher(parolaNoua));
-//    }
-
     bool checkLogin(const std::string& _username, const std::string& _parola) const {
         std::string parolaHashed = PasswordManager::hash_password(_parola, salt);
         return (username == _username && parola == parolaHashed);
     }
 
-    void setPassword(const std::string& parolaNecriptata) {
-        salt = PasswordManager::make_salt();
-        parola = PasswordManager::hash_password(parolaNecriptata, salt);
-    }
 
     void setCategorie(bool categorieNoua) {
         categorie = categorieNoua;
@@ -223,10 +210,6 @@ public:
     void scadeDinBalanta(int sumaScaduta) {
         balanta.adaugaSuma(-sumaScaduta);
         std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
-    }
-
-    std::string getSalt() const {
-        return salt;
     }
 
 };
@@ -295,8 +278,8 @@ public:
         std::string line;
         while (std::getline(file, line)) {
             std::stringstream ss(line);
-            std::string nume;
-            std::getline(ss, nume, ',');
+            std::string numeFilm;
+            std::getline(ss, numeFilm, ',');
 
             std::string durataStr;
             std::getline(ss, durataStr, ',');
