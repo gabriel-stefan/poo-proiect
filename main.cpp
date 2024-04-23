@@ -1,31 +1,31 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-//#include <functional>
 #include <fstream>
-//#include <digestpp.hpp> <---- nu pot sa rezolv aici
+#include <digestpp.hpp>
+//#include <functional>
 //#include <thread>
 //#include <SFML/Graphics.hpp>
 //#include <Helper.h>
 //#include "env_fixes.h"
 
-//class PasswordManager {
-//public:
-//    static std::string make_salt() {
-//        static uint64_t nr = 1u;
-//        std::string salt;
-//        auto bytes = static_cast<char*>(static_cast<void*>(&nr));
-//        for(unsigned i = 0; i < 16; i++) {
-//            salt += bytes[i%8];
-//        }
-//        ++nr;
-//        return salt;
-//    }
-//
-//    static std::string hash_password(const std::string& plain, const std::string& salt) {
-//        return digestpp::blake2b(512).set_salt(salt).absorb(plain).hexdigest();
-//    }
-//};
+class PasswordManager {
+public:
+    static std::string make_salt() {
+        static uint64_t nr = 1u;
+        std::string salt;
+        auto bytes = static_cast<char*>(static_cast<void*>(&nr));
+        for(unsigned i = 0; i < 16; i++) {
+            salt += bytes[i%8];
+        }
+        ++nr;
+        return salt;
+    }
+
+    static std::string hash_password(const std::string& plain, const std::string& salt) {
+        return digestpp::blake2b(512).set_salt(salt).absorb(plain).hexdigest();
+    }
+};
 
 class Actor{
 private:
@@ -144,25 +144,27 @@ class User{
 private:
     std::string username;
     std::string parola;
+    std::string salt;
     Balanta balanta;
     bool categorie;
 public:
     User() = default;
 
-    User(const std::string& _username, const std::string& _parola, const Balanta& _balanta, const bool& _categorie)
-        :username(_username), parola(_parola), balanta(_balanta), categorie(_categorie)
+    User(const std::string& _username, const std::string& _parola, const std::string& _salt, const Balanta& _balanta, const bool& _categorie)
+        :username(_username), parola(_parola), salt(_salt), balanta(_balanta), categorie(_categorie)
     {}
 
     User& operator=(const User& other){
         username = other.username;
         parola = other.parola;
+        salt = other.salt;
         balanta = other.balanta;
         categorie = other.categorie;
         return *this;
     }
 
     User(const User& other)
-            : username(other.username), parola(other.parola), balanta(other.balanta), categorie(other.categorie)
+            : username(other.username), parola(other.parola), salt(other.salt), balanta(other.balanta), categorie(other.categorie)
     {}
 
     ~User(){}
@@ -172,19 +174,23 @@ public:
         return os;
     }
 
-    void setUsername(const std::string& usernameNou) {
-        username = usernameNou;
-    }
-
-    void setPassword(const std::string& parolaNoua) {
-        std::hash<std::string> hasher;
-        parola = std::to_string(hasher(parolaNoua));
-    }
+//    void setUsername(const std::string& usernameNou) {
+//        username = usernameNou;
+//    }
+//
+//    void setPassword(const std::string& parolaNoua) {
+//        std::hash<std::string> hasher;
+//        parola = std::to_string(hasher(parolaNoua));
+//    }
 
     bool checkLogin(const std::string& _username, const std::string& _parola) const {
-        std::hash<std::string> hasher;
-        std::string hashed_parola = std::to_string(hasher(_parola));
-        return (username == _username && parola == hashed_parola);
+        std::string parolaHashed = PasswordManager::hash_password(_parola, salt);
+        return (username == _username && parola == parolaHashed);
+    }
+
+    void setPassword(const std::string& parolaNecriptata) {
+        salt = PasswordManager::make_salt();
+        parola = PasswordManager::hash_password(parolaNecriptata, salt);
     }
 
     void setCategorie(bool categorieNoua) {
@@ -217,6 +223,10 @@ public:
     void scadeDinBalanta(int sumaScaduta) {
         balanta.adaugaSuma(-sumaScaduta);
         std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
+    }
+
+    std::string getSalt() const {
+        return salt;
     }
 
 };
@@ -253,9 +263,9 @@ public:
         std::cin >> username;
         std::cout << "Parola:";
         std::cin >> parola;
-        std::hash<std::string> hasher;
-        std::string hashed_parola = std::to_string(hasher(parola));
-        user = User(username,hashed_parola, Balanta(0), false);
+        std::string salt = PasswordManager::make_salt();
+        std::string parolaHashed = PasswordManager::hash_password(parola, salt);
+        user = User(username, parolaHashed, salt, Balanta(0), false);
         std::cout << "\n";
     }
 
@@ -278,7 +288,7 @@ public:
         std::ifstream file("filme.csv");
 
         if (!file.is_open()) {
-            std::cerr << "Nu s-a putut deschide fisierul'filme.csv'" << '\n';
+            std::cout << "Nu s-a putut deschide fisierul'filme.csv'" << '\n';
             return;
         }
 
@@ -294,7 +304,7 @@ public:
             try {
                 durata = std::stoi(durataStr);
             } catch (std::invalid_argument&) {
-                std::cerr << "Durata invalida: " << durataStr << '\n';
+                std::cout << "Durata invalida: " << durataStr << '\n';
                 continue;
             }
 
@@ -304,7 +314,7 @@ public:
             try {
                 pret = std::stoi(pretStr);
             } catch (std::invalid_argument&) {
-                std::cerr << "Pret invalid: " << pretStr << '\n';
+                std::cout << "Pret invalid: " << pretStr << '\n';
                 continue;
             }
 
@@ -323,7 +333,7 @@ public:
                 try {
                     varsta = std::stoi(varstaStr);
                 } catch (std::invalid_argument&) {
-                    std::cerr << "Varsta invalida: " << varstaStr << '\n';
+                    std::cout << "Varsta invalida: " << varstaStr << '\n';
                     continue;
                 }
                 cast.push_back(Actor(nume, varsta));
