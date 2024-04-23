@@ -322,7 +322,7 @@ public:
                 cast.push_back(Actor(nume, varsta));
             }
 
-            filme.push_back(Film(nume, durata, pret, cast));
+            filme.push_back(Film(numeFilm, durata, pret, cast));
         }
 
         file.close();
