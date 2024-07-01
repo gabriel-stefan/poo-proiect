@@ -108,6 +108,12 @@ add_executable(${PROJECT_NAME}
     generated/src/Helper.cpp
     env_fixes.h
         ext/include/digestpp/digestpp.hpp
+        passwordmanager.h
+        passwordmanager.h
+        film.h
+        user.h
+        aplicatie.h
+        balanta.h
 )
 
 ###############################################################################
