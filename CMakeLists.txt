@@ -114,6 +114,11 @@ add_executable(${PROJECT_NAME}
         user.h
         aplicatie.h
         balanta.h
+        exceptieCustom.h
+        paymentMethod.h
+        card.h
+        paypal.h
+        actor.h
 )
 
 ###############################################################################

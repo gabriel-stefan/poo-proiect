@@ -1,5 +1,3 @@
-// film.h
-
 #ifndef OOP_FILM_H
 #define OOP_FILM_H
 
@@ -8,37 +6,21 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include "exceptieCustom.h"
+#include "actor.h"
 
-class Actor {
-private:
-    std::string nume;
-    int varsta;
+class InvalidSeatException : public CustomException {
 public:
-    Actor() = default;
-
-    Actor(const std::string& _nume, const int _varsta)
-            : nume(_nume), varsta(_varsta)
-    {}
-
-    Actor& operator=(const Actor& other) {
-        if (this != &other) {
-            nume = other.nume;
-            varsta = other.varsta;
-        }
-        return *this;
-    }
-
-    Actor(const Actor& other)
-            : nume(other.nume), varsta(other.varsta)
-    {}
-
-    ~Actor() {}
-
-    friend std::ostream& operator<<(std::ostream& os, const Actor& other) {
-        os << other.nume << ", " << other.varsta << " ani ";
-        return os;
-    }
+    InvalidSeatException(int row, int col)
+            : CustomException("Pozitie a locului invalida (" + std::to_string(row) + ", " + std::to_string(col) + ").") {}
 };
+
+class SeatAlreadyOccupiedException : public CustomException {
+public:
+    SeatAlreadyOccupiedException(int row, int col)
+            : CustomException("Locul este deja ocupat la pozitia (" + std::to_string(row) + ", " + std::to_string(col) + ").") {}
+};
+
 
 class Film {
 private:
@@ -46,12 +28,12 @@ private:
     int durata;
     int pret;
     std::vector<Actor> cast;
-    std::vector<std::string> schedule; // Added schedule attribute
-    std::vector<std::vector<char>> seating; // Seating arrangement
+    std::vector<std::string> schedule;
+    std::vector<std::vector<char>> seating;
 
     void initializeSeating() {
         seating = std::vector<std::vector<char>>(5, std::vector<char>(10, 'O')); // 'O' for Occupied, 'L' for Free
-        std::srand(std::time(nullptr)); // Seed for randomness
+        std::srand(std::time(nullptr));
         for (auto& row : seating) {
             for (auto& seat : row) {
                 if (std::rand() % 2 == 0) {
@@ -136,10 +118,19 @@ public:
     }
 
     bool isSeatFree(int row, int col) const {
+        if (row < 0 || row >= seating.size() || col < 0 || col >= seating[0].size()) {
+            throw InvalidSeatException(row, col);
+        }
         return seating[row][col] == 'L';
     }
 
     void occupySeat(int row, int col) {
+        if (row < 0 || row >= seating.size() || col < 0 || col >= seating[0].size()) {
+            throw InvalidSeatException(row, col);
+        }
+        if (seating[row][col] == 'O') {
+            throw SeatAlreadyOccupiedException(row, col);
+        }
         seating[row][col] = 'O';
     }
 };

@@ -1,5 +1,3 @@
-// aplicatie.h
-
 #ifndef OOP_APLICATIE_H
 #define OOP_APLICATIE_H
 
@@ -8,16 +6,16 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 #include "passwordmanager.h"
 #include "film.h"
 #include "user.h"
 #include "balanta.h"
+#include "exceptieCustom.h"
 
-class FileOpenException : public std::runtime_error {
+class FileOpenException : public CustomException {
 public:
     FileOpenException(const std::string &filename)
-            : std::runtime_error("Nu s-a putut deschide fisierul: " + filename) {}
+            : CustomException("Nu s-a putut deschide fisierul: " + filename) {}
 };
 
 class Aplicatie {
@@ -193,6 +191,22 @@ public:
     }
 
     void gestionareBalanta() {
+        std::cout << "1. Adauga bani in balanta\n";
+        std::cout << "2. Vezi istoricul tranzactiilor\n";
+        int optiune;
+        std::cin >> optiune;
+
+        if (optiune == 1) {
+            adaugaBaniInBalanta();
+        } else if (optiune == 2) {
+            user.getBalantaObject().afisareIstoricTranzactii();
+        } else {
+            std::cout << "Optiune invalida.\n";
+        }
+    }
+
+private:
+    void adaugaBaniInBalanta() {
         std::cout << "Balanta curenta: " << user.getBalanta() << "\n";
         std::cout << "Introdu suma pe care vrei sa o adaugi in balanta:";
         int sumaAdaugata;
@@ -221,13 +235,10 @@ public:
         } else {
             std::cout << "Plata in curs...\n";
             try {
-                if (paymentMethod->pay(sumaAdaugata)) {
-                    user.adaugaInBalanta(sumaAdaugata);
-                    std::cout << "Noua balanta: " << user.getBalanta() << "\n";
-                } else {
-                    std::cout << "Plata a esuat. Fondurile nu au fost adaugate in balanta.\n";
-                }
-            } catch (const std::exception &e) {
+                paymentMethod->pay(sumaAdaugata);
+                user.adaugaInBalanta(sumaAdaugata);
+                std::cout << "Noua balanta: " << user.getBalanta() << "\n";
+            } catch (const CustomException &e) {
                 std::cout << "Eroare la procesarea platii: " << e.what() << '\n';
             }
         }

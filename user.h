@@ -1,5 +1,3 @@
-// user.h
-
 #ifndef OOP_USER_H
 #define OOP_USER_H
 
@@ -10,12 +8,7 @@
 #include "passwordmanager.h"
 #include <vector>
 #include "balanta.h"
-
-class InvalidBalanceOperationException : public std::runtime_error {
-public:
-    InvalidBalanceOperationException(const std::string &message)
-            : std::runtime_error(message) {}
-};
+#include "exceptieCustom.h"
 
 class User {
 private:
@@ -137,9 +130,13 @@ public:
         return balanta.getSuma();
     }
 
+    Balanta& getBalantaObject() {
+        return balanta;
+    }
+
     void adaugaInBalanta(int sumaAdaugata) {
         if (sumaAdaugata < 10 || sumaAdaugata > 500) {
-            throw InvalidBalanceOperationException("Suma adaugata trebuie sa fie intre 10 si 500.");
+            throw CustomException("Suma adaugata trebuie sa fie intre 10 si 500.");
         } else {
             balanta.adaugaSuma(sumaAdaugata);
         }
@@ -149,13 +146,9 @@ public:
         return balanta.getSuma() >= pretBilet;
     }
 
-    void scadeDinBalanta(int sumaScaduta) {
-        try {
-            balanta.adaugaSuma(-sumaScaduta);
-            std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
-        } catch (const std::exception &e) {
-            std::cerr << "Eroare la scaderea din balanta: " << e.what() << '\n';
-        }
+    void scadeDinBalanta(int sumaScazuta) {
+        balanta.scadeSuma(sumaScazuta);
+        std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
     }
 };
 
