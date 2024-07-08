@@ -3,14 +3,13 @@
 #include <chrono>
 #include <fstream>
 #include <digestpp.hpp>
-#include "passwordmanager.h"
-#include "film.h"
-#include "user.h"
-#include "aplicatie.h"
+#include "Headers/passwordmanager.h"
+#include "Headers/film.h"
+#include "Headers/user.h"
+#include "Headers/aplicatie.h"
 
 int main() {
     Aplicatie app;
-    app.initializareFilme();
 
     bool autentificat = false;
     while (!autentificat) {

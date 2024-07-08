@@ -108,18 +108,27 @@ add_executable(${PROJECT_NAME}
     generated/src/Helper.cpp
     env_fixes.h
         ext/include/digestpp/digestpp.hpp
-        passwordmanager.h
-        passwordmanager.h
-        film.h
-        user.h
-        aplicatie.h
-        balanta.h
-        exceptieCustom.h
-        paymentMethod.h
-        card.h
-        paypal.h
-        actor.h
-        admin.h
+        Headers/passwordmanager.h
+        Headers/passwordmanager.h
+        Headers/film.h
+        Headers/user.h
+        Headers/aplicatie.h
+        Headers/balanta.h
+        Headers/exceptieCustom.h
+        Headers/paymentMethod.h
+        Headers/card.h
+        Headers/paypal.h
+        Headers/actor.h
+        Headers/admin.h
+        src/actor.cpp
+        src/admin.cpp
+        src/aplicatie.cpp
+        src/balanta.cpp
+        src/card.cpp
+        src/film.cpp
+        src/passwordmanager.cpp
+        src/paypal.cpp
+        src/user.cpp
 )
 
 ###############################################################################
