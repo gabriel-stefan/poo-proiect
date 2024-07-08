@@ -4,14 +4,14 @@
 #include <string>
 #include <iostream>
 #include <ctime>
+#include <vector>
 #include "film.h"
 #include "passwordmanager.h"
-#include <vector>
 #include "balanta.h"
 #include "exceptieCustom.h"
 
 class User {
-private:
+protected:
     std::string username;
     std::string parola;
     std::string salt;
@@ -21,6 +21,7 @@ private:
     bool isValidated;
     std::string validationFileName;
     std::time_t validationExpiry;
+    std::string role;
 
     std::time_t addOneYear() const {
         std::time_t now = std::time(nullptr);
@@ -37,31 +38,34 @@ private:
     }
 
 public:
-    User() : categorie(false), isValidated(false), validationExpiry(0) {}
+    User() : categorie(false), isValidated(false), validationExpiry(0), role("user") {}
 
-    User(const std::string& _username, const std::string& _parola, const std::string& _salt, const Balanta& _balanta, const bool& _categorie)
-            : username(_username), parola(_parola), salt(_salt), balanta(_balanta), categorie(_categorie), isValidated(false), validationExpiry(0)
+    User(const std::string& _username, const std::string& _parola, const std::string& _salt, const Balanta& _balanta, const bool& _categorie, const std::string& _role = "user")
+            : username(_username), parola(_parola), salt(_salt), balanta(_balanta), categorie(_categorie), isValidated(false), validationExpiry(0), role(_role)
     {}
 
     User& operator=(const User& other) {
-        username = other.username;
-        parola = other.parola;
-        salt = other.salt;
-        balanta = other.balanta;
-        categorie = other.categorie;
-        categoryType = other.categoryType;
-        isValidated = other.isValidated;
-        validationFileName = other.validationFileName;
-        validationExpiry = other.validationExpiry;
+        if (this != &other) {
+            username = other.username;
+            parola = other.parola;
+            salt = other.salt;
+            balanta = other.balanta;
+            categorie = other.categorie;
+            categoryType = other.categoryType;
+            isValidated = other.isValidated;
+            validationFileName = other.validationFileName;
+            validationExpiry = other.validationExpiry;
+            role = other.role;
+        }
         return *this;
     }
 
     User(const User& other)
             : username(other.username), parola(other.parola), salt(other.salt), balanta(other.balanta), categorie(other.categorie),
-              categoryType(other.categoryType), isValidated(other.isValidated), validationFileName(other.validationFileName), validationExpiry(other.validationExpiry)
+              categoryType(other.categoryType), isValidated(other.isValidated), validationFileName(other.validationFileName), validationExpiry(other.validationExpiry), role(other.role)
     {}
 
-    ~User() {}
+    virtual ~User() {}
 
     friend std::ostream& operator<<(std::ostream& os, const User& other) {
         os << "Username: " << other.username << ", Parola: " << other.parola << "\n" << other.balanta;
@@ -112,7 +116,6 @@ public:
     }
 
     void validateCategory() {
-        // Here you can add code to actually validate the picture if needed.
         isValidated = true;
         validationExpiry = addOneYear();
         std::cout << "Licenta " << categoryType << " a fost validata si este valabila un an din acest moment.\n";
@@ -149,6 +152,26 @@ public:
     void scadeDinBalanta(int sumaScazuta) {
         balanta.scadeSuma(sumaScazuta);
         std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
+    }
+
+    std::string getRole() const {
+        return role;
+    }
+
+    const std::string& getUsername() const {
+        return username;
+    }
+
+    const std::string& getParola() const {
+        return parola;
+    }
+
+    const std::string& getSalt() const {
+        return salt;
+    }
+
+    bool isCategorie() const {
+        return categorie;
     }
 };
 

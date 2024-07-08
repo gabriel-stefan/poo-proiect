@@ -119,6 +119,7 @@ add_executable(${PROJECT_NAME}
         card.h
         paypal.h
         actor.h
+        admin.h
 )
 
 ###############################################################################

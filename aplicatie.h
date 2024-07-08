@@ -6,11 +6,13 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <regex>
 #include "passwordmanager.h"
 #include "film.h"
 #include "user.h"
 #include "balanta.h"
 #include "exceptieCustom.h"
+#include "admin.h"
 
 class FileOpenException : public CustomException {
 public:
@@ -18,31 +20,108 @@ public:
             : CustomException("Nu s-a putut deschide fisierul: " + filename) {}
 };
 
+
+class InvalidDateException : public CustomException {
+public:
+    InvalidDateException(const std::string &date)
+            : CustomException("Data invalida: " + date) {}
+};
+
+class InvalidTimeException : public CustomException {
+public:
+    InvalidTimeException(const std::string &time)
+            : CustomException("Ora invalida: " + time) {}
+};
+
+class InvalidChoiceException : public CustomException {
+public:
+    InvalidChoiceException(const std::string &choice)
+            : CustomException("Optiune invalida: " + choice) {}
+};
+
 class Aplicatie {
 private:
     std::vector<Film> filme;
-    User user;
-public:
-    Aplicatie() = default;
+    std::vector<User*> utilizatori;
+    User* userCurent;
 
-    Aplicatie(const std::vector<Film> &_filme, const User &_user)
-            : filme(_filme), user(_user) {}
-
-    Aplicatie(const Aplicatie &other)
-            : filme(other.filme), user(other.user) {}
-
-    Aplicatie &operator=(const Aplicatie &other) {
-        if (this != &other) {
-            filme = other.filme;
-            user = other.user;
-        }
-        return *this;
+    bool isValidDate(const std::string& date) {
+        std::regex datePattern(R"(\d{4}-\d{2}-\d{2})");
+        return std::regex_match(date, datePattern);
     }
 
-    ~Aplicatie() {}
+    bool isValidTime(const std::string& time) {
+        std::regex timePattern(R"(\d{2}:\d{2})");
+        return std::regex_match(time, timePattern);
+    }
+
+    void loadUsers() {
+        std::ifstream file("users.csv");
+
+        if (!file.is_open()) {
+            throw FileOpenException("users.csv");
+        }
+
+        std::string line;
+        while (std::getline(file, line)) {
+            std::stringstream ss(line);
+            std::string username, parola, salt, balantaStr, categorieStr, role;
+            bool categorie;
+            int balanta;
+
+            std::getline(ss, username, ',');
+            std::getline(ss, parola, ',');
+            std::getline(ss, salt, ',');
+            std::getline(ss, balantaStr, ',');
+            balanta = std::stoi(balantaStr);
+            std::getline(ss, categorieStr, ',');
+            categorie = (categorieStr == "1");
+            std::getline(ss, role, ',');
+
+            if (role == "admin") {
+                utilizatori.push_back(new Admin(username, parola, salt, Balanta(balanta)));
+            } else {
+                utilizatori.push_back(new User(username, parola, salt, Balanta(balanta), categorie));
+            }
+        }
+
+        file.close();
+    }
+
+    void saveUsers() {
+        std::ofstream file("users.csv");
+
+        if (!file.is_open()) {
+            throw FileOpenException("users.csv");
+        }
+
+        for (const auto& user : utilizatori) {
+            file << user->getUsername() << "," << user->getParola() << "," << user->getSalt() << ","
+                 << user->getBalanta() << "," << user->isCategorie() << "," << user->getRole() << "\n";
+        }
+
+        file.close();
+    }
+
+public:
+    Aplicatie() : userCurent(nullptr) {
+        loadUsers();
+    }
+
+    Aplicatie(const std::vector<Film> &_filme, const std::vector<User*> &_utilizatori)
+            : filme(_filme), utilizatori(_utilizatori), userCurent(nullptr) {
+        loadUsers();
+    }
+
+    ~Aplicatie() {
+        saveUsers();
+        for (auto user : utilizatori) {
+            delete user;
+        }
+    }
 
     void signUp() {
-        std::cout << "Bun venit la Movie Booking System! Te rog sa iti creezi un cont!\n";
+        std::cout << "Creeaza un cont nou!\n";
         std::cout << "Username:";
         std::string username, parola;
         std::cin >> username;
@@ -50,8 +129,21 @@ public:
         std::cin >> parola;
         std::string salt = PasswordManager::make_salt();
         std::string parolaHashed = PasswordManager::hash_password(parola, salt);
-        user = User(username, parolaHashed, salt, Balanta(0), false);
-        std::cout << "\n";
+
+        std::cout << "Selecteaza rol: [1] User, [2] Admin\n";
+        int choice;
+        std::cin >> choice;
+
+        if (choice == 1) {
+            utilizatori.push_back(new User(username, parolaHashed, salt, Balanta(0), false));
+        } else if (choice == 2) {
+            utilizatori.push_back(new Admin(username, parolaHashed, salt, Balanta(0)));
+        } else {
+            throw InvalidChoiceException(std::to_string(choice));
+        }
+
+        saveUsers();
+        std::cout << "Cont creat cu succes!\n";
     }
 
     bool logIn() {
@@ -61,12 +153,17 @@ public:
         std::cin >> username;
         std::cout << "Parola:";
         std::cin >> parola;
-        if (!user.checkLogin(username, parola)) {
-            std::cout << "Date de autentificare invalide.\n";
-            return false;
-        } else {
-            return true;
+
+        for (auto user : utilizatori) {
+            if (user->checkLogin(username, parola)) {
+                userCurent = user;
+                std::cout << "Conectare reușită!\n";
+                return true;
+            }
         }
+
+        std::cout << "Date de autentificare invalide.\n";
+        return false;
     }
 
     void initializareFilme() {
@@ -125,6 +222,201 @@ public:
         file.close();
     }
 
+    void meniuUtilizator() {
+        if (!userCurent) {
+            std::cout << "Niciun utilizator conectat.\n";
+            return;
+        }
+
+        int optiune;
+        do {
+            std::cout << "Alegi ce vrei sa faci:\n";
+            std::cout << "1. Alege un film\n";
+            std::cout << "2. Actualizeaza categoria\n";
+            std::cout << "3. Gestioneaza balanta\n";
+            std::cout << "4. Creeaza cont nou\n";
+            if (dynamic_cast<Admin*>(userCurent)) {
+                std::cout << "5. Meniu admin\n";
+                std::cout << "6. Deconecteaza-te\n";
+            } else {
+                std::cout << "5. Deconecteaza-te\n";
+            }
+            std::cin >> optiune;
+
+            try {
+                switch (optiune) {
+                    case 1:
+                        cumparaBiletFilm();
+                        break;
+                    case 2:
+                        selectareCategorie();
+                        break;
+                    case 3:
+                        gestionareBalanta();
+                        break;
+                    case 4:
+                        signUp();
+                        break;
+                    case 5:
+                        if (dynamic_cast<Admin*>(userCurent)) {
+                            adminMenu();
+                        } else {
+                            userCurent = nullptr;
+                            std::cout << "Te-ai deconectat.\n";
+                            return;
+                        }
+                        break;
+                    case 6:
+                        userCurent = nullptr;
+                        std::cout << "Te-ai deconectat.\n";
+                        return;
+                    default:
+                        throw InvalidChoiceException(std::to_string(optiune));
+                }
+            } catch (const CustomException& e) {
+                std::cout << "Eroare: " << e.what() << "\n";
+            }
+        } while (optiune != 5 || (dynamic_cast<Admin*>(userCurent) && optiune != 6));
+    }
+
+    void adminMenu() {
+        Admin* admin = dynamic_cast<Admin*>(userCurent);
+        if (!admin) {
+            std::cout << "Nu ai acces la meniul de administrare.\n";
+            return;
+        }
+
+        int optiune;
+        do {
+            std::cout << "Meniu admin:\n";
+            std::cout << "1. Adauga film\n";
+            std::cout << "2. Modifica pret film\n";
+            std::cout << "3. Modifica program film\n";
+            std::cout << "4. Inapoi la meniul principal\n";
+            std::cin >> optiune;
+
+            try {
+                switch (optiune) {
+                    case 1:
+                        adaugaFilm(admin);
+                        break;
+                    case 2:
+                        modificaPretFilm(admin);
+                        break;
+                    case 3:
+                        modificaProgramFilm(admin);
+                        break;
+                    case 4:
+                        return;
+                    default:
+                        throw InvalidChoiceException(std::to_string(optiune));
+                }
+            } catch (const CustomException& e) {
+                std::cout << "Eroare: " << e.what() << "\n";
+            }
+        } while (optiune != 4);
+    }
+
+    void adaugaFilm(Admin* admin) {
+        std::string nume;
+        int durata, pret;
+        std::vector<Actor> cast;
+        std::vector<std::string> schedule;
+
+        std::cout << "Introdu numele filmului: ";
+        std::cin.ignore();
+        std::getline(std::cin, nume);
+
+        std::cout << "Introdu durata filmului (minute): ";
+        std::cin >> durata;
+
+        std::cout << "Introdu pretul filmului (RON): ";
+        std::cin >> pret;
+
+        int nrActori;
+        std::cout << "Introdu numarul de actori: ";
+        std::cin >> nrActori;
+
+        for (int i = 0; i < nrActori; ++i) {
+            std::string numeActor;
+            int varsta;
+            std::cout << "Introdu numele actorului: ";
+            std::cin.ignore();
+            std::getline(std::cin, numeActor);
+
+            std::cout << "Introdu varsta actorului: ";
+            std::cin >> varsta;
+
+            cast.push_back(Actor(numeActor, varsta));
+        }
+
+        int nrProgramari;
+        std::cout << "Introdu numarul de programari: ";
+        std::cin >> nrProgramari;
+
+        for (int i = 0; i < nrProgramari; ++i) {
+            std::string program;
+            std::cout << "Introdu programarea (e.g., 2024-07-08 19:00): ";
+            std::cin.ignore();
+            std::getline(std::cin, program);
+            if (!isValidDate(program.substr(0, 10))) {
+                throw InvalidDateException(program.substr(0, 10));
+            }
+            if (!isValidTime(program.substr(11))) {
+                throw InvalidTimeException(program.substr(11));
+            }
+            schedule.push_back(program);
+        }
+
+        admin->adaugaFilm(filme, Film(nume, durata, pret, cast, schedule));
+    }
+
+    void modificaPretFilm(Admin* admin) {
+        int index, pretNou;
+        std::cout << "Selecteaza indexul filmului: ";
+        std::cin >> index;
+
+        if (index < 1 || index > filme.size()) {
+            throw InvalidChoiceException(std::to_string(index));
+        }
+
+        std::cout << "Introdu pretul nou: ";
+        std::cin >> pretNou;
+
+        admin->modificaPretFilm(filme[index - 1], pretNou);
+    }
+
+    void modificaProgramFilm(Admin* admin) {
+        int index, nrProgramari;
+        std::vector<std::string> programNou;
+
+        std::cout << "Selecteaza indexul filmului: ";
+        std::cin >> index;
+
+        if (index < 1 || index > filme.size()) {
+            throw InvalidChoiceException(std::to_string(index));
+        }
+
+        std::cout << "Introdu numarul de programari noi: ";
+        std::cin >> nrProgramari;
+
+        for (int i = 0; i < nrProgramari; ++i) {
+            std::string program;
+            std::cout << "Introdu programarea (e.g., 2024-07-08 19:00): ";
+            std::cin.ignore();
+            std::getline(std::cin, program);
+            if (!isValidDate(program.substr(0, 10))) {
+                throw InvalidDateException(program.substr(0, 10));
+            }
+            if (!isValidTime(program.substr(11))) {
+                throw InvalidTimeException(program.substr(11));
+            }
+            programNou.push_back(program);
+        }
+
+        admin->modificaProgramFilm(filme[index - 1], programNou);
+    }
+
     void cumparaBiletFilm() {
         for (size_t i = 0; i < filme.size(); ++i) {
             std::cout << i + 1 << ". ";
@@ -139,7 +431,7 @@ public:
         std::cin >> numar_selectat;
 
         if (numar_selectat > nr) {
-            std::cout << "Ai ales un numar prea mare care nu corespunde niciunui film!\n";
+            throw InvalidChoiceException(std::to_string(numar_selectat));
         } else {
             Film& filmSelectat = filme[numar_selectat - 1];
 
@@ -155,10 +447,10 @@ public:
             std::cin >> data_selectata;
 
             if (data_selectata > schedule.size()) {
-                std::cout << "Ai ales un numar prea mare care nu corespunde niciunei programari!\n";
+                throw InvalidChoiceException(std::to_string(data_selectata));
             } else {
-                int pretFinal = user.reducere(filmSelectat);
-                if (user.areBani(pretFinal)) {
+                int pretFinal = userCurent->reducere(filmSelectat);
+                if (userCurent->areBani(pretFinal)) {
                     filmSelectat.printSeating();
 
                     std::cout << "Alege un rand (0-4):\n";
@@ -170,24 +462,24 @@ public:
                     std::cin >> col;
 
                     if (row < 0 || row >= 5 || col < 0 || col >= 10) {
-                        std::cout << "Rand sau loc invalid!\n";
+                        throw InvalidChoiceException("Rand sau loc invalid");
                     } else if (!filmSelectat.isSeatFree(row, col)) {
                         std::cout << "Locul este deja ocupat!\n";
                     } else {
                         filmSelectat.occupySeat(row, col);
                         std::cout << "Felicitari! Ai cumparat bilet pentru data " << schedule[data_selectata - 1] << " la randul " << row << " locul " << col << "!\n";
-                        user.scadeDinBalanta(pretFinal);
+                        userCurent->scadeDinBalanta(pretFinal);
                     }
                 } else {
                     std::cout << "Nu ai suficienti bani pentru a cumpara biletul.\n";
-                    std::cout << "Balanta curenta: " << user.getBalanta() << "\n";
+                    std::cout << "Balanta curenta: " << userCurent->getBalanta() << "\n";
                 }
             }
         }
     }
 
     void selectareCategorie() {
-        user.selectCategory();
+        userCurent->selectCategory();
     }
 
     void gestionareBalanta() {
@@ -196,18 +488,25 @@ public:
         int optiune;
         std::cin >> optiune;
 
-        if (optiune == 1) {
-            adaugaBaniInBalanta();
-        } else if (optiune == 2) {
-            user.getBalantaObject().afisareIstoricTranzactii();
-        } else {
-            std::cout << "Optiune invalida.\n";
+        try {
+            switch (optiune) {
+                case 1:
+                    adaugaBaniInBalanta();
+                    break;
+                case 2:
+                    userCurent->getBalantaObject().afisareIstoricTranzactii();
+                    break;
+                default:
+                    throw InvalidChoiceException(std::to_string(optiune));
+            }
+        } catch (const CustomException& e) {
+            std::cout << "Eroare: " << e.what() << "\n";
         }
     }
 
 private:
     void adaugaBaniInBalanta() {
-        std::cout << "Balanta curenta: " << user.getBalanta() << "\n";
+        std::cout << "Balanta curenta: " << userCurent->getBalanta() << "\n";
         std::cout << "Introdu suma pe care vrei sa o adaugi in balanta:";
         int sumaAdaugata;
         std::cin >> sumaAdaugata;
@@ -226,18 +525,17 @@ private:
         } else if (metoda == 2) {
             paymentMethod = std::make_unique<PayPal>();
         } else {
-            std::cout << "Metoda de plata invalida.\n";
-            return;
+            throw InvalidChoiceException(std::to_string(metoda));
         }
 
         if (sumaAdaugata < 10 || sumaAdaugata > 500) {
-            std::cout << "Suma adaugata trebuie sa fie intre 10 si 500.\n";
+            throw CustomException("Suma adaugata trebuie sa fie intre 10 si 500.");
         } else {
             std::cout << "Plata in curs...\n";
             try {
                 paymentMethod->pay(sumaAdaugata);
-                user.adaugaInBalanta(sumaAdaugata);
-                std::cout << "Noua balanta: " << user.getBalanta() << "\n";
+                userCurent->adaugaInBalanta(sumaAdaugata);
+                std::cout << "Noua balanta: " << userCurent->getBalanta() << "\n";
             } catch (const CustomException &e) {
                 std::cout << "Eroare la procesarea platii: " << e.what() << '\n';
             }

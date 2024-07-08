@@ -21,31 +21,33 @@ class PayPal : public PaymentMethod {
 private:
     std::string email;
     std::string hashedParola;
+    std::string salt;
 
     const std::string validEmail = "test123@gmail.com";
-    const std::string validParola = "parola123";
+    const std::string validHashedParola = PasswordManager::hash_password("parola123", "fixed_salt");
+    const std::string validSalt = "fixed_salt";
 
 public:
     PayPal() = default;
 
     PayPal(const std::string &email, const std::string &parola)
-            : email(email) {
-        hashedParola = PasswordManager::hash_password(parola, PasswordManager::make_salt());
+            : email(email), salt(PasswordManager::make_salt()) {
+        hashedParola = PasswordManager::hash_password(parola, salt);
     }
 
     void pay(int suma) const override {
-        std::string email;
-        std::string parola;
+        std::string emailInput;
+        std::string parolaInput;
 
         std::cout << "Introdu email-ul contului PayPal: ";
         std::cin.ignore();
-        std::getline(std::cin, email);
+        std::getline(std::cin, emailInput);
         std::cout << "Introdu parola contului PayPal: ";
-        std::getline(std::cin, parola);
+        std::getline(std::cin, parolaInput);
 
-        std::string hashedParolaInput = PasswordManager::hash_password(parola, PasswordManager::make_salt());
+        std::string hashedParolaInput = PasswordManager::hash_password(parolaInput, validSalt);
 
-        if (email != validEmail || parola != validParola) {
+        if (emailInput != validEmail || hashedParolaInput != validHashedParola) {
             throw InvalidPayPalCredentialsException();
         }
 
@@ -56,6 +58,5 @@ public:
         return std::make_unique<PayPal>(*this);
     }
 };
-
 
 #endif //OOP_PAYPAL_H

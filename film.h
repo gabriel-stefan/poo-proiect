@@ -21,7 +21,6 @@ public:
             : CustomException("Locul este deja ocupat la pozitia (" + std::to_string(row) + ", " + std::to_string(col) + ").") {}
 };
 
-
 class Film {
 private:
     std::string nume;
@@ -96,6 +95,10 @@ public:
 
     const std::vector<std::string>& getSchedule() const {
         return schedule;
+    }
+
+    void setSchedule(const std::vector<std::string>& newSchedule) {
+        schedule = newSchedule;
     }
 
     void printFilmDetails() const {
