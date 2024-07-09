@@ -13,22 +13,22 @@
 
 class FileOpenException : public CustomException {
 public:
-    FileOpenException(const std::string &filename);
+    explicit FileOpenException(const std::string &filename);
 };
 
 class InvalidDateException : public CustomException {
 public:
-    InvalidDateException(const std::string &date);
+    explicit InvalidDateException(const std::string &date);
 };
 
 class InvalidTimeException : public CustomException {
 public:
-    InvalidTimeException(const std::string &time);
+    explicit InvalidTimeException(const std::string &time);
 };
 
 class InvalidChoiceException : public CustomException {
 public:
-    InvalidChoiceException(const std::string &choice);
+    explicit InvalidChoiceException(const std::string &choice);
 };
 
 class Aplicatie {

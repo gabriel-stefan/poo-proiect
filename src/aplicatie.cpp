@@ -246,7 +246,7 @@ void Aplicatie::meniuUtilizator() {
         } catch (const CustomException& e) {
             std::cout << "Eroare: " << e.what() << "\n";
         }
-    } while (optiune != 5 || (dynamic_cast<Admin*>(userCurent) && optiune != 6));
+    } while ((dynamic_cast<Admin*>(userCurent) && optiune != 6) || optiune != 5);
 }
 
 void Aplicatie::adminMenu() {

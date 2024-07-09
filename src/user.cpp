@@ -128,26 +128,6 @@ void User::scadeDinBalanta(int sumaScazuta) {
     std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
 }
 
-std::string User::getRole() const {
-    return role;
-}
-
-const std::string& User::getUsername() const {
-    return username;
-}
-
-const std::string& User::getParola() const {
-    return parola;
-}
-
-const std::string& User::getSalt() const {
-    return salt;
-}
-
-bool User::isCategorie() const {
-    return categorie;
-}
-
 void User::writeToFile(std::ofstream& file) const {
     file << username << "," << parola << "," << salt << ","
          << balanta.getSuma() << "," << (categorie ? "1" : "0") << "," << role << "\n";
