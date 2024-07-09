@@ -83,14 +83,14 @@ void Film::printSeating() const {
 }
 
 bool Film::isSeatFree(int row, int col) const {
-    if (row < 0 || row >= seating.size() || col < 0 || col >= seating[0].size()) {
+    if (row < 0 || row >= static_cast<int>(seating.size()) || col < 0 || col >= static_cast<int>(seating[0].size())) {
         throw InvalidSeatException(row, col);
     }
     return seating[row][col] == 'L';
 }
 
 void Film::occupySeat(int row, int col) {
-    if (row < 0 || row >= seating.size() || col < 0 || col >= seating[0].size()) {
+    if (row < 0 || row >= static_cast<int>(seating.size()) || col < 0 || col >= static_cast<int>(seating[0].size())) {
         throw InvalidSeatException(row, col);
     }
     if (seating[row][col] == 'O') {
