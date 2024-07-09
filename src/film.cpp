@@ -100,7 +100,7 @@ void Film::occupySeat(int row, int col) {
 }
 
 void Film::initializeSeating() {
-    seating = std::vector<std::vector<char>>(5, std::vector<char>(10, 'O')); // 'O' for Occupied, 'L' for Free
+    seating = std::vector<std::vector<char>>(5, std::vector<char>(10, 'O')); // 'O' pentru ocupat, 'L' pentry liber
     std::srand(std::time(nullptr));
     for (auto& row : seating) {
         for (auto& seat : row) {

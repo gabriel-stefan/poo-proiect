@@ -5,6 +5,7 @@
 #include <iostream>
 #include <ctime>
 #include <vector>
+#include <fstream>
 #include "film.h"
 #include "passwordmanager.h"
 #include "balanta.h"
@@ -52,6 +53,8 @@ public:
     const std::string& getParola() const;
     const std::string& getSalt() const;
     bool isCategorie() const;
+
+    void writeToFile(std::ofstream& file) const;
 };
 
 #endif // OOP_USER_H

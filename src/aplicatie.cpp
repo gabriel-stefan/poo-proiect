@@ -66,8 +66,7 @@ void Aplicatie::saveUsers() {
     }
 
     for (const auto& user : utilizatori) {
-        file << user->getUsername() << "," << user->getParola() << "," << user->getSalt() << ","
-             << user->getBalanta() << "," << user->isCategorie() << "," << user->getRole() << "\n";
+        user->writeToFile(file);
     }
 
     file.close();

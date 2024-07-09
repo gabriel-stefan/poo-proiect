@@ -1,7 +1,7 @@
 #ifndef OOP_PASSWORDMANAGER_H
 #define OOP_PASSWORDMANAGER_H
 
-#include <string>  // include string pentru a folosi std::string
+#include <string>
 
 class PasswordManager {
 public:

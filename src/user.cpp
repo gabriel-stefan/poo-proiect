@@ -1,7 +1,3 @@
-//
-// Created by Gabriel on 7/8/2024.
-//
-
 #include "../Headers/user.h"
 
 std::time_t User::addOneYear() const {
@@ -150,4 +146,9 @@ const std::string& User::getSalt() const {
 
 bool User::isCategorie() const {
     return categorie;
+}
+
+void User::writeToFile(std::ofstream& file) const {
+    file << username << "," << parola << "," << salt << ","
+         << balanta.getSuma() << "," << (categorie ? "1" : "0") << "," << role << "\n";
 }
