@@ -13,14 +13,6 @@ Stefan Gabriel
 4242424242000089
 11/11
 123
-3
-1
-200
-1
-Stefan Gabriel
-4242424242424242
-11/11
-123
 1
 2
 1
@@ -28,6 +20,7 @@ Stefan Gabriel
 1
 3
 2
+4
 admin
 parola1234
 2
