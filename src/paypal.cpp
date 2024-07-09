@@ -17,7 +17,7 @@ PayPal::PayPal(const std::string &email, const std::string &parola)
     hashedParola = PasswordManager::hash_password(parola, salt);
 }
 
-void PayPal::pay(int suma) const {
+void PayPal::pay(int) const {
     std::string emailInput;
     std::string parolaInput;
 

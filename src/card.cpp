@@ -26,7 +26,7 @@ Card::Card(const std::string &nume, const std::string &numarCard, const std::str
                                   {"4242424242000089", 1000002}  // Insufficient funds
                           }), validCVV("123") {}
 
-void Card::pay(int /*suma*/) const {
+void Card::pay(int ) const {
     std::string inputNume;
     std::string inputNumarCard;
     std::string inputDataExpirare;
