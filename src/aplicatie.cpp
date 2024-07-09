@@ -346,7 +346,7 @@ void Aplicatie::modificaPretFilm(Admin* admin) {
     std::cout << "Selecteaza indexul filmului: ";
     std::cin >> index;
 
-    if (index < 1 || index > filme.size()) {
+    if (index < 1 || static_cast<size_t>(index) > filme.size()) {
         throw InvalidChoiceException(std::to_string(index));
     }
 
@@ -363,7 +363,7 @@ void Aplicatie::modificaProgramFilm(Admin* admin) {
     std::cout << "Selecteaza indexul filmului: ";
     std::cin >> index;
 
-    if (index < 1 || index > filme.size()) {
+    if (index < 1 || static_cast<size_t>(index) > filme.size()) {
         throw InvalidChoiceException(std::to_string(index));
     }
 

@@ -11,7 +11,7 @@ InvalidCVVException::InvalidCVVException()
         : CustomException("Invalid CVV. Error: 1000004") {}
 
 Card::Card()
-        : validCVV("123"),
+        : nume(""), dataExpirare(""), hashedNumarCard(""), hashedCVV(""), validCVV("123"),
           testCardNumbers({
                                   {"4242424242424242", 0},  // Successful purchase
                                   {"4242424242424241", 1000001},  // Invalid card number
@@ -19,9 +19,7 @@ Card::Card()
                           }) {}
 
 Card::Card(const std::string &nume, const std::string &numarCard, const std::string &dataExpirare, const std::string &cvv)
-        : nume(nume),
-          dataExpirare(dataExpirare),
-          validCVV("123"),
+        : nume(nume), dataExpirare(dataExpirare), validCVV("123"),
           hashedNumarCard(PasswordManager::hash_password(numarCard, PasswordManager::make_salt())),
           hashedCVV(PasswordManager::hash_password(cvv, PasswordManager::make_salt())),
           testCardNumbers({
@@ -30,7 +28,7 @@ Card::Card(const std::string &nume, const std::string &numarCard, const std::str
                                   {"4242424242000089", 1000002}  // Insufficient funds
                           }) {}
 
-void Card::pay(int suma) const {
+void Card::pay(int /*suma*/) const { // Unused parameter is commented out to avoid the warning
     std::string inputNume;
     std::string inputNumarCard;
     std::string inputDataExpirare;

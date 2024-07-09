@@ -10,17 +10,17 @@
 
 class InvalidCardNumberException : public CustomException {
 public:
-    InvalidCardNumberException();
+    explicit InvalidCardNumberException();
 };
 
 class InsufficientFundsException : public CustomException {
 public:
-    InsufficientFundsException();
+    explicit InsufficientFundsException();
 };
 
 class InvalidCVVException : public CustomException {
 public:
-    InvalidCVVException();
+    explicit InvalidCVVException();
 };
 
 class Card : public PaymentMethod {
@@ -29,7 +29,6 @@ private:
     std::string hashedNumarCard;
     std::string dataExpirare;
     std::string hashedCVV;
-
     std::unordered_map<std::string, int> testCardNumbers;
     const std::string validCVV;
 
