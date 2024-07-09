@@ -129,6 +129,7 @@ add_executable(${PROJECT_NAME}
         src/passwordmanager.cpp
         src/paypal.cpp
         src/user.cpp
+        Headers/Singleton.h
 )
 
 ###############################################################################

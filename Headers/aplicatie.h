@@ -10,6 +10,7 @@
 #include "balanta.h"
 #include "exceptieCustom.h"
 #include "admin.h"
+#include "Singleton.h"
 
 class FileOpenException : public CustomException {
 public:
@@ -31,11 +32,14 @@ public:
     explicit InvalidChoiceException(const std::string &choice);
 };
 
-class Aplicatie {
+class Aplicatie : public Singleton<Aplicatie> {
 private:
     std::vector<Film> filme;
     std::vector<User*> utilizatori;
     User* userCurent;
+
+    friend class Singleton<Aplicatie>;
+    Aplicatie(); // Constructor privat
 
     bool isValidDate(const std::string& date);
     bool isValidTime(const std::string& time);
@@ -44,8 +48,6 @@ private:
     void initializareFilme();
 
 public:
-    Aplicatie();
-    Aplicatie(const std::vector<Film> &_filme, const std::vector<User*> &_utilizatori);
     ~Aplicatie();
 
     void signUp();

@@ -77,12 +77,6 @@ Aplicatie::Aplicatie() : userCurent(nullptr) {
     initializareFilme();
 }
 
-Aplicatie::Aplicatie(const std::vector<Film> &_filme, const std::vector<User*> &_utilizatori)
-        : filme(_filme), utilizatori(_utilizatori), userCurent(nullptr) {
-    loadUsers();
-    initializareFilme();
-}
-
 Aplicatie::~Aplicatie() {
     saveUsers();
     for (auto user : utilizatori) {

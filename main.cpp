@@ -2,14 +2,13 @@
 #include <vector>
 #include <chrono>
 #include <fstream>
-#include <digestpp.hpp>
 #include "Headers/passwordmanager.h"
 #include "Headers/film.h"
 #include "Headers/user.h"
 #include "Headers/aplicatie.h"
 
 int main() {
-    Aplicatie app;
+    Aplicatie& app = Aplicatie::getInstance();
 
     bool autentificat = false;
     while (!autentificat) {
