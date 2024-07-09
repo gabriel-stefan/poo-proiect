@@ -11,24 +11,22 @@ InvalidCVVException::InvalidCVVException()
         : CustomException("Invalid CVV. Error: 1000004") {}
 
 Card::Card()
-        : nume(""), hashedNumarCard(""), dataExpirare(""), hashedCVV(""), validCVV("123"),
-          testCardNumbers({
-                                  {"4242424242424242", 0},  // Successful purchase
-                                  {"4242424242424241", 1000001},  // Invalid card number
-                                  {"4242424242000089", 1000002}  // Insufficient funds
-                          }) {}
+        : nume(""), hashedNumarCard(""), dataExpirare(""), hashedCVV(""), testCardNumbers({
+                                                                                                  {"4242424242424242", 0},  // Successful purchase
+                                                                                                  {"4242424242424241", 1000001},  // Invalid card number
+                                                                                                  {"4242424242000089", 1000002}  // Insufficient funds
+                                                                                          }), validCVV("123") {}
 
 Card::Card(const std::string &nume, const std::string &numarCard, const std::string &dataExpirare, const std::string &cvv)
         : nume(nume), hashedNumarCard(PasswordManager::hash_password(numarCard, PasswordManager::make_salt())),
           dataExpirare(dataExpirare), hashedCVV(PasswordManager::hash_password(cvv, PasswordManager::make_salt())),
-          validCVV("123"),
           testCardNumbers({
                                   {"4242424242424242", 0},  // Successful purchase
                                   {"4242424242424241", 1000001},  // Invalid card number
                                   {"4242424242000089", 1000002}  // Insufficient funds
-                          }) {}
+                          }), validCVV("123") {}
 
-void Card::pay(int /*suma*/) const { // Unused parameter is commented out to avoid the warning
+void Card::pay(int /*suma*/) const {
     std::string inputNume;
     std::string inputNumarCard;
     std::string inputDataExpirare;
