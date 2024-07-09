@@ -57,9 +57,6 @@ bool User::checkLogin(const std::string& _username, const std::string& _parola) 
     return (username == _username && parola == parolaHashed);
 }
 
-void User::setCategorie(bool categorieNoua) {
-    categorie = categorieNoua;
-}
 
 void User::selectCategory() {
     if (isValidated) {

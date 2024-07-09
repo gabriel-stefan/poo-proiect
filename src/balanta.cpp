@@ -44,9 +44,6 @@ void Balanta::scadeSuma(int sumaScazuta) {
     transactionHistory.push_back(-sumaScazuta);
 }
 
-void Balanta::setPaymentMethod(std::unique_ptr<PaymentMethod> method) {
-    paymentMethod = std::move(method);
-}
 
 void Balanta::pay(int amount) const {
     if (paymentMethod) {
