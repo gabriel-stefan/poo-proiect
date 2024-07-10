@@ -13,6 +13,14 @@ Stefan Gabriel
 4242424242000089
 11/11
 123
+3
+1
+150
+1
+Stefan Gabriel
+4242424242424242
+11/11
+123
 1
 2
 1
@@ -24,5 +32,5 @@ Stefan Gabriel
 admin
 parola1234
 2
-5
+6
 
