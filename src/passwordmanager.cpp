@@ -1,18 +1,40 @@
-//
-// Created by Gabriel on 6/30/2024.
-//
-
 #include "../Headers/passwordmanager.h"
 #include "digestpp.hpp"
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+uint64_t PasswordManager::get_next_salt() {
+    std::ifstream in("salt_max.txt");
+    uint64_t current_salt = 1;
+    if (in.is_open()) {
+        in >> current_salt;
+        in.close();
+    }
+    return current_salt;
+}
+
+void PasswordManager::update_salt(uint64_t new_salt) {
+    std::ofstream out("salt_max.txt");
+    if (out.is_open()) {
+        out << new_salt;
+        out.close();
+    } else {
+        throw std::runtime_error("Nu se poate deschide salt_max.txt.");
+    }
+}
 
 std::string PasswordManager::make_salt() {
-    static uint64_t nr = 1u;
+    uint64_t current_salt = get_next_salt();
+    update_salt(current_salt + 1);
+
     std::string salt;
-    auto bytes = static_cast<char*>(static_cast<void*>(&nr));
-    for(unsigned i = 0; i < 16; i++) {
-        salt += bytes[i % 8];
+    auto bytes = reinterpret_cast<char*>(&current_salt);
+    for (unsigned i = 0; i < 8; i++) {
+        salt += bytes[i];
     }
-    ++nr;
+    salt += salt;
+
     return salt;
 }
 

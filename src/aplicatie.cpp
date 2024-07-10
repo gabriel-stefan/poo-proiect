@@ -339,7 +339,6 @@ void Aplicatie::adminMenu() {
 
 void Aplicatie::adaugaFilm(Admin* admin) {
     std::string nume;
-    int durata, pret;
     std::vector<Actor> cast;
     std::vector<std::string> schedule;
 
@@ -347,9 +346,11 @@ void Aplicatie::adaugaFilm(Admin* admin) {
     std::cin.ignore();
     std::getline(std::cin, nume);
 
+    int durata;
     std::cout << "Introdu durata filmului (minute): ";
     std::cin >> durata;
 
+    int pret;
     std::cout << "Introdu pretul filmului (RON): ";
     std::cin >> pret;
 
@@ -391,6 +392,7 @@ void Aplicatie::adaugaFilm(Admin* admin) {
     Film newFilm(nume, durata, pret, cast, schedule);
     admin->adaugaFilm(filme, newFilm);
 }
+
 
 
 void Aplicatie::modificaPretFilm(Admin* admin) {
