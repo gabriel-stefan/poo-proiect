@@ -118,12 +118,11 @@ void Aplicatie::initializareFilme() {
 
     for (csv::CSVRow& row: in) {
         std::string numeFilm, castStr, scheduleStr;
-        int durata, pret;
 
         try {
             numeFilm = row["numeFilm"].get<>();
-            durata = row["durata"].get<int>();
-            pret = row["pret"].get<int>();
+            int durata = row["durata"].get<int>();
+            int pret = row["pret"].get<int>();
             castStr = row["cast"].get<>();
             scheduleStr = row["schedule"].get<>();
 

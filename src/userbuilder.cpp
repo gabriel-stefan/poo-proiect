@@ -1,5 +1,8 @@
 #include "../Headers/userbuilder.h"
 
+UserBuilder::UserBuilder()
+        : username(""), parola(""), salt(""), balanta(0), categorie(false), role("") {}
+
 UserBuilder& UserBuilder::setUsername(const std::string& username) {
     this->username = username;
     return *this;
