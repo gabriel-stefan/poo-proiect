@@ -37,21 +37,28 @@ bool Aplicatie::isValidTime(const std::string& time) {
 }
 
 void Aplicatie::loadUsers() {
-    csv::CSVReader in("users.csv");
+    try {
+        csv::CSVReader in("users.csv");
+        for (csv::CSVRow& row : in) {
+            if (row["username"].is_null()) {
+                continue;
+            }
 
-    for (csv::CSVRow& row: in) {
-        std::string username = row["username"].get<>();
-        std::string parola = row["parola"].get<>();
-        std::string salt = row["salt"].get<>();
-        int balanta = row["balanta"].get<int>();
-        bool categorie = row["categorie"].get<bool>();
-        std::string role = row["role"].get<>();
+            std::string username = row["username"].get<>();
+            std::string parola = row["parola"].get<>();
+            std::string salt = row["salt"].get<>();
+            int balanta = row["balanta"].get<int>();
+            bool categorie = row["categorie"].get<bool>();
+            std::string role = row["role"].get<>();
 
-        if (role == "admin") {
-            utilizatori.push_back(new Admin(username, parola, salt, Balanta(balanta)));
-        } else {
-            utilizatori.push_back(new User(username, parola, salt, Balanta(balanta), categorie));
+            if (role == "admin") {
+                utilizatori.push_back(new Admin(username, parola, salt, Balanta(balanta)));
+            } else {
+                utilizatori.push_back(new User(username, parola, salt, Balanta(balanta), categorie));
+            }
         }
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
     }
 }
 
@@ -62,12 +69,12 @@ void Aplicatie::saveUsers() {
         throw FileOpenException("users.csv");
     }
 
-    file << "username,parola,salt,balanta,categorie,role\n";
-    for (const auto& user : utilizatori) {
-        user->writeToFile(file);
-    }
+    auto writer = csv::make_csv_writer(file);
+    writer << std::vector<std::string>{"username", "parola", "salt", "balanta", "categorie", "role"};
 
-    file.close();
+    for (const auto &user: utilizatori) {
+        user->writeToCSV(writer);
+    }
 }
 
 bool Aplicatie::userExists(const std::string& username) {
@@ -140,7 +147,21 @@ void Aplicatie::initializareFilme() {
                 schedule.push_back(date);
             }
 
-            filme.push_back(FilmFactory::createFilm(numeFilm, durata, pret, cast, schedule));
+            if (numeFilm.find("Actiune") != std::string::npos) {
+                filme.push_back(FilmFactory::createActionFilm());
+            } else if (numeFilm.find("Comedie") != std::string::npos) {
+                filme.push_back(FilmFactory::createComedyFilm());
+            } else if (numeFilm.find("Drama") != std::string::npos) {
+                filme.push_back(FilmFactory::createDramaFilm());
+            } else if (numeFilm.find("Familie") != std::string::npos) {
+                filme.push_back(FilmFactory::createFamilyFilm());
+            } else if (numeFilm.find("Thriller") != std::string::npos) {
+                filme.push_back(FilmFactory::createThrillerFilm());
+            } else if (numeFilm.find("SF") != std::string::npos) {
+                filme.push_back(FilmFactory::createSFFilm());
+            } else {
+                filme.push_back(Film(numeFilm, durata, pret, cast, schedule));
+            }
         } catch (const std::invalid_argument &e) {
             std::cout << "Eroare la procesarea liniei: " << numeFilm << "\n";
             std::cout << e.what() << '\n';
@@ -367,8 +388,10 @@ void Aplicatie::adaugaFilm(Admin* admin) {
         schedule.push_back(program);
     }
 
-    admin->adaugaFilm(filme, FilmFactory::createFilm(nume, durata, pret, cast, schedule));
+    Film newFilm(nume, durata, pret, cast, schedule);
+    admin->adaugaFilm(filme, newFilm);
 }
+
 
 void Aplicatie::modificaPretFilm(Admin* admin) {
     int index, pretNou;

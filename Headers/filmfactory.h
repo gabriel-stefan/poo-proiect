@@ -1,11 +1,18 @@
-#ifndef OOP_FILMFACTORY_H
-#define OOP_FILMFACTORY_H
+#ifndef FILM_FACTORY_H
+#define FILM_FACTORY_H
 
 #include "film.h"
+#include <vector>
+#include <string>
 
 class FilmFactory {
 public:
-    static Film createFilm(const std::string& nume, int durata, int pret, const std::vector<Actor>& cast, const std::vector<std::string>& schedule);
+    static Film createActionFilm();
+    static Film createComedyFilm();
+    static Film createDramaFilm();
+    static Film createFamilyFilm();
+    static Film createThrillerFilm();
+    static Film createSFFilm();
 };
 
-#endif // OOP_FILMFACTORY_H
+#endif // FILM_FACTORY_H

@@ -1,4 +1,5 @@
 #include "../Headers/user.h"
+#include <csv.hpp>
 
 std::time_t User::addOneYear() const {
     std::time_t now = std::time(nullptr);
@@ -41,10 +42,6 @@ User::User(const User& other)
 
 User::~User() {}
 
-const std::string& User::getUsername() const {
-    return username;
-}
-
 std::ostream& operator<<(std::ostream& os, const User& other) {
     os << "Username: " << other.username << ", Parola: " << other.parola << "\n" << other.balanta;
     if (other.isValidated) {
@@ -60,7 +57,6 @@ bool User::checkLogin(const std::string& _username, const std::string& _parola) 
     std::string parolaHashed = PasswordManager::hash_password(_parola, salt);
     return (username == _username && parola == parolaHashed);
 }
-
 
 void User::selectCategory() {
     if (isValidated) {
@@ -129,7 +125,33 @@ void User::scadeDinBalanta(int sumaScazuta) {
     std::cout << "Noua balanta: " << balanta.getSuma() << "\n";
 }
 
-void User::writeToFile(std::ofstream& file) const {
-    file << username << "," << parola << "," << salt << ","
-         << balanta.getSuma() << "," << (categorie ? "1" : "0") << "," << role << "\n";
+std::string User::getRole() const {
+    return role;
+}
+
+const std::string& User::getUsername() const {
+    return username;
+}
+
+const std::string& User::getParola() const {
+    return parola;
+}
+
+const std::string& User::getSalt() const {
+    return salt;
+}
+
+bool User::isCategorie() const {
+    return categorie;
+}
+
+void User::writeToCSV(csv::CSVWriter<std::ofstream> &writer) const {
+    writer << std::vector<std::string>{
+            getUsername(),
+            getParola(),
+            getSalt(),
+            std::to_string(getBalanta()),
+            isCategorie() ? "1" : "0",
+            getRole()
+    };
 }

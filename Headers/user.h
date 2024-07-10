@@ -10,6 +10,7 @@
 #include "passwordmanager.h"
 #include "balanta.h"
 #include "exceptieCustom.h"
+#include <csv.hpp>
 
 class User {
 protected:
@@ -54,7 +55,7 @@ public:
     const std::string& getSalt() const;
     bool isCategorie() const;
 
-    void writeToFile(std::ofstream& file) const;
+    void writeToCSV(csv::CSVWriter<std::ofstream> &writer) const;
 };
 
 #endif // OOP_USER_H

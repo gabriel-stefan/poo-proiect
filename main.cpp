@@ -8,6 +8,8 @@
 #include "Headers/aplicatie.h"
 
 int main() {
+
+
     Aplicatie& app = Aplicatie::getInstance();
 
     bool autentificat = false;

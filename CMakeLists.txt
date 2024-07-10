@@ -186,7 +186,8 @@ endif()
 # update name in .github/workflows/cmake.yml:29 when changing "bin" name here
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 # install(DIRECTORY some_dir1 some_dir2 DESTINATION bin)
-install(FILES filme.csv DESTINATION bin)
+install(FILES filme.csv users.csv DESTINATION bin)
+
 if(APPLE)
     install(FILES launcher.command DESTINATION bin)
 endif()
