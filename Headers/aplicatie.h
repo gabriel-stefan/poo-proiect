@@ -11,6 +11,7 @@
 #include "exceptieCustom.h"
 #include "admin.h"
 #include "Singleton.h"
+#include "csv.hpp"
 
 class FileOpenException : public CustomException {
 public:
@@ -32,6 +33,11 @@ public:
     explicit InvalidChoiceException(const std::string &choice);
 };
 
+class UserAlreadyExistsException : public CustomException {
+public:
+    explicit UserAlreadyExistsException(const std::string &username);
+};
+
 class Aplicatie : public Singleton<Aplicatie> {
 private:
     std::vector<Film> filme;
@@ -39,13 +45,14 @@ private:
     User* userCurent;
 
     friend class Singleton<Aplicatie>;
-    Aplicatie(); // Constructor privat
+    Aplicatie();
 
     bool isValidDate(const std::string& date);
     bool isValidTime(const std::string& time);
     void loadUsers();
     void saveUsers();
     void initializareFilme();
+    bool userExists(const std::string& username);
 
 public:
     ~Aplicatie();
@@ -60,6 +67,7 @@ public:
     void cumparaBiletFilm();
     void selectareCategorie();
     void gestionareBalanta();
+    void deleteUser(const std::string& username);
 
 private:
     void adaugaBaniInBalanta();

@@ -41,6 +41,10 @@ User::User(const User& other)
 
 User::~User() {}
 
+const std::string& User::getUsername() const {
+    return username;
+}
+
 std::ostream& operator<<(std::ostream& os, const User& other) {
     os << "Username: " << other.username << ", Parola: " << other.parola << "\n" << other.balanta;
     if (other.isValidated) {

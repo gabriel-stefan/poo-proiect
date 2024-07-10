@@ -2,6 +2,14 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <csv.hpp>
+#include "../Headers/userbuilder.h"
+#include "../Headers/filmfactory.h"
+#include "../Headers/admin.h"
+#include "../Headers/card.h"
+#include "../Headers/paypal.h"
+#include "../Headers/paymentMethod.h"
+
 
 FileOpenException::FileOpenException(const std::string &filename)
         : CustomException("Nu s-a putut deschide fisierul: " + filename) {}
@@ -15,6 +23,9 @@ InvalidTimeException::InvalidTimeException(const std::string &time)
 InvalidChoiceException::InvalidChoiceException(const std::string &choice)
         : CustomException("Optiune invalida: " + choice) {}
 
+UserAlreadyExistsException::UserAlreadyExistsException(const std::string &username)
+        : CustomException("Username-ul " + username + " exista deja.") {}
+
 bool Aplicatie::isValidDate(const std::string& date) {
     std::regex datePattern(R"(\d{4}-\d{2}-\d{2})");
     return std::regex_match(date, datePattern);
@@ -26,27 +37,15 @@ bool Aplicatie::isValidTime(const std::string& time) {
 }
 
 void Aplicatie::loadUsers() {
-    std::ifstream file("users.csv");
+    csv::CSVReader in("users.csv");
 
-    if (!file.is_open()) {
-        throw FileOpenException("users.csv");
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string username, parola, salt, balantaStr, categorieStr, role;
-        bool categorie;
-        int balanta;
-
-        std::getline(ss, username, ',');
-        std::getline(ss, parola, ',');
-        std::getline(ss, salt, ',');
-        std::getline(ss, balantaStr, ',');
-        balanta = std::stoi(balantaStr);
-        std::getline(ss, categorieStr, ',');
-        categorie = (categorieStr == "1");
-        std::getline(ss, role, ',');
+    for (csv::CSVRow& row: in) {
+        std::string username = row["username"].get<>();
+        std::string parola = row["parola"].get<>();
+        std::string salt = row["salt"].get<>();
+        int balanta = row["balanta"].get<int>();
+        bool categorie = row["categorie"].get<bool>();
+        std::string role = row["role"].get<>();
 
         if (role == "admin") {
             utilizatori.push_back(new Admin(username, parola, salt, Balanta(balanta)));
@@ -54,22 +53,45 @@ void Aplicatie::loadUsers() {
             utilizatori.push_back(new User(username, parola, salt, Balanta(balanta), categorie));
         }
     }
-
-    file.close();
 }
+
 
 void Aplicatie::saveUsers() {
     std::ofstream file("users.csv");
-
     if (!file.is_open()) {
         throw FileOpenException("users.csv");
     }
 
+    file << "username,parola,salt,balanta,categorie,role\n";
     for (const auto& user : utilizatori) {
         user->writeToFile(file);
     }
 
     file.close();
+}
+
+bool Aplicatie::userExists(const std::string& username) {
+    for (const auto& user : utilizatori) {
+        if (user->getUsername() == username) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Aplicatie::deleteUser(const std::string& username) {
+    auto it = std::remove_if(utilizatori.begin(), utilizatori.end(), [&username](User* user) {
+        return user->getUsername() == username;
+    });
+
+    if (it != utilizatori.end()) {
+        delete *it;
+        utilizatori.erase(it);
+        saveUsers();
+        std::cout << "User-ul " << username << " a fost sters cu succes.\n";
+    } else {
+        throw CustomException("User-ul " + username + " nu exista.");
+    }
 }
 
 Aplicatie::Aplicatie() : userCurent(nullptr) {
@@ -85,31 +107,21 @@ Aplicatie::~Aplicatie() {
 }
 
 void Aplicatie::initializareFilme() {
-    std::ifstream file("filme.csv");
+    csv::CSVReader in("filme.csv");
 
-    if (!file.is_open()) {
-        throw FileOpenException("filme.csv");
-    }
+    for (csv::CSVRow& row: in) {
+        std::string numeFilm, castStr, scheduleStr;
+        int durata, pret;
 
-    std::string line;
-    while (std::getline(file, line)) {
         try {
-            std::stringstream ss(line);
-            std::string numeFilm;
-            std::getline(ss, numeFilm, ',');
-
-            std::string durataStr;
-            std::getline(ss, durataStr, ',');
-            int durata = std::stoi(durataStr);
-
-            std::string pretStr;
-            std::getline(ss, pretStr, ',');
-            int pret = std::stoi(pretStr);
+            numeFilm = row["numeFilm"].get<>();
+            durata = row["durata"].get<int>();
+            pret = row["pret"].get<int>();
+            castStr = row["cast"].get<>();
+            scheduleStr = row["schedule"].get<>();
 
             std::vector<Actor> cast;
-            std::string actorsStr;
-            std::getline(ss, actorsStr, ',');
-            std::stringstream ssActors(actorsStr);
+            std::stringstream ssActors(castStr);
             std::string actorStr;
             while (std::getline(ssActors, actorStr, ';')) {
                 std::stringstream ssActor(actorStr);
@@ -122,29 +134,32 @@ void Aplicatie::initializareFilme() {
             }
 
             std::vector<std::string> schedule;
-            std::string scheduleStr;
-            std::getline(ss, scheduleStr);
             std::stringstream ssSchedule(scheduleStr);
             std::string date;
             while (std::getline(ssSchedule, date, ';')) {
                 schedule.push_back(date);
             }
 
-            filme.push_back(Film(numeFilm, durata, pret, cast, schedule));
+            filme.push_back(FilmFactory::createFilm(numeFilm, durata, pret, cast, schedule));
         } catch (const std::invalid_argument &e) {
-            std::cout << "Eroare la procesarea liniei: " << line << "\n";
+            std::cout << "Eroare la procesarea liniei: " << numeFilm << "\n";
             std::cout << e.what() << '\n';
         }
     }
-
-    file.close();
 }
+
+
 
 void Aplicatie::signUp() {
     std::cout << "Creeaza un cont nou!\n";
     std::cout << "Username:";
     std::string username, parola;
     std::cin >> username;
+
+    if (userExists(username)) {
+        throw UserAlreadyExistsException(username);
+    }
+
     std::cout << "Parola:";
     std::cin >> parola;
     std::string salt = PasswordManager::make_salt();
@@ -154,14 +169,21 @@ void Aplicatie::signUp() {
     int choice;
     std::cin >> choice;
 
+    UserBuilder builder;
+    builder.setUsername(username)
+            .setParola(parolaHashed)
+            .setSalt(salt)
+            .setBalanta(Balanta(0));
+
     if (choice == 1) {
-        utilizatori.push_back(new User(username, parolaHashed, salt, Balanta(0), false));
+        builder.setCategorie(false).setRole("user");
     } else if (choice == 2) {
-        utilizatori.push_back(new Admin(username, parolaHashed, salt, Balanta(0)));
+        builder.setRole("admin");
     } else {
         throw InvalidChoiceException(std::to_string(choice));
     }
 
+    utilizatori.push_back(new User(builder.build()));
     saveUsers();
     std::cout << "Cont creat cu succes!\n";
 }
@@ -199,11 +221,12 @@ void Aplicatie::meniuUtilizator() {
         std::cout << "2. Actualizeaza categoria\n";
         std::cout << "3. Gestioneaza balanta\n";
         std::cout << "4. Creeaza cont nou\n";
+        std::cout << "5. Sterge cont\n";
         if (dynamic_cast<Admin*>(userCurent)) {
-            std::cout << "5. Meniu admin\n";
-            std::cout << "6. Deconecteaza-te\n";
+            std::cout << "6. Meniu admin\n";
+            std::cout << "7. Deconecteaza-te\n";
         } else {
-            std::cout << "5. Deconecteaza-te\n";
+            std::cout << "6. Deconecteaza-te\n";
         }
         std::cin >> optiune;
 
@@ -222,6 +245,14 @@ void Aplicatie::meniuUtilizator() {
                     signUp();
                     break;
                 case 5:
+                {
+                    std::cout << "Introdu username-ul contului pe care doresti sa il stergi: ";
+                    std::string username;
+                    std::cin >> username;
+                    deleteUser(username);
+                }
+                    break;
+                case 6:
                     if (dynamic_cast<Admin*>(userCurent)) {
                         adminMenu();
                     } else {
@@ -230,18 +261,22 @@ void Aplicatie::meniuUtilizator() {
                         return;
                     }
                     break;
-                case 6:
-                    userCurent = nullptr;
-                    std::cout << "Te-ai deconectat.\n";
-                    return;
+                case 7:
+                    if (dynamic_cast<Admin*>(userCurent)) {
+                        userCurent = nullptr;
+                        std::cout << "Te-ai deconectat.\n";
+                        return;
+                    }
+                    break;
                 default:
                     throw InvalidChoiceException(std::to_string(optiune));
             }
         } catch (const CustomException& e) {
             std::cout << "Eroare: " << e.what() << "\n";
         }
-    } while ((dynamic_cast<Admin*>(userCurent) && optiune != 6) || optiune != 5);
+    } while ((dynamic_cast<Admin*>(userCurent) && optiune != 7) || optiune != 6);
 }
+
 
 void Aplicatie::adminMenu() {
     Admin* admin = dynamic_cast<Admin*>(userCurent);
@@ -332,7 +367,7 @@ void Aplicatie::adaugaFilm(Admin* admin) {
         schedule.push_back(program);
     }
 
-    admin->adaugaFilm(filme, Film(nume, durata, pret, cast, schedule));
+    admin->adaugaFilm(filme, FilmFactory::createFilm(nume, durata, pret, cast, schedule));
 }
 
 void Aplicatie::modificaPretFilm(Admin* admin) {

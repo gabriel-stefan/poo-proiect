@@ -1,5 +1,8 @@
 #include "../Headers/balanta.h"
+#include "../Headers/paymentMethod.h"
+#include "../Headers/exceptieCustom.h"
 #include <iostream>
+
 
 Balanta::Balanta() : suma(0) {}
 
@@ -38,7 +41,7 @@ void Balanta::adaugaSuma(int sumaAdaugata) {
 
 void Balanta::scadeSuma(int sumaScazuta) {
     if (sumaScazuta > suma) {
-        throw InsufficientFundsException();
+        //throw InsufficientFundsException();
     }
     suma -= sumaScazuta;
     transactionHistory.push_back(-sumaScazuta);

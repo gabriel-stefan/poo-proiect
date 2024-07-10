@@ -130,6 +130,11 @@ add_executable(${PROJECT_NAME}
         src/paypal.cpp
         src/user.cpp
         Headers/Singleton.h
+        Headers/compare.h
+        Headers/filmfactory.h
+        src/filmfactory.cpp
+        Headers/userbuilder.h
+        src/userbuilder.cpp
 )
 
 ###############################################################################
@@ -165,6 +170,7 @@ set_custom_stdlib_and_sanitizers(${PROJECT_NAME} true)
 # use SYSTEM so cppcheck/clang-tidy does not report warnings from these directories
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE generated/include)
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ext/include/digestpp/)
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ext/include/csv-parser/)
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${SFML_SOURCE_DIR}/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${SFML_BINARY_DIR}/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-system Threads::Threads)
@@ -184,3 +190,5 @@ install(FILES filme.csv DESTINATION bin)
 if(APPLE)
     install(FILES launcher.command DESTINATION bin)
 endif()
+
+
