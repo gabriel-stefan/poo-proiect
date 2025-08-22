@@ -1,77 +1,54 @@
-### Movie Booking System
+# Movie Booking System
 
-Movie Booking System este un sistem ce permite userilor sa rezerve locuri la diferite filme de la cinema. Userii trebuie sa isi creeze un cont cu care sa se logheze apoi in sistem, iar apoi acestia pot cumpara bilete la mai multe filme, in limita balantei contului. Se pot adauga bani in balanta, iar userii isi pot actualiza categoria de varsta astfel incat sa poate beneficia de reduceri. 
+Movie Booking System is a console-based C++ project designed to simulate the management of a cinema system. It allows users to create accounts, log in, select movies, choose showtimes, and purchase tickets. The application also supports user categories (such as students or seniors) that enable discounts on ticket prices. Admin users can manage movies by adding new films, modifying prices, and updating schedules. The system features balance management, simulated payments via Card or PayPal, and maintains transaction histories. Data is persisted using CSV files, and the application employs object-oriented programming principles such as inheritance, polymorphism, and the singleton pattern to provide a structured and scalable solution.
 
-### Important!
-Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar în folder-ul `generated`.
-Codul generat pus "ca să fie"/pe care nu îl înțelegeți se punctează doar pentru puncte bonus, doar în contextul
-în care oferă funcționalități ajutătoare și doar dacă are sens.
+---
 
-O cerință nu se consideră îndeplinită dacă este realizată doar ca o serie de apeluri proxy către cod generat.
+## Features
 
-### Cerințe modele de limbaj la nivel de semestru
-- [ ] minim o funcționalitate majoritar doar cu LLM
-- [ ] minim 2-3 funcționalități ~50% voi, ~50% LLM-ul
-- [ ] minim 2-3 funcționalități suficient de complicate pe care un LLM nu le poate implementa
+1. **User Authentication and Account Management**
+   - Create new accounts (User/Admin)
+   - Log in
+   - Delete account
+   - Log out
 
-### Tema 0
+2. **Movie Management**
+   - View the list of movies
+   - Add new movies (Admin only)
+   - Modify movie prices (Admin)
+   - Modify movie schedule (Admin)
+   - Select a movie and view available showtimes
 
-- [X] Nume proiect (poate fi schimbat ulterior)
-- [X] Scurtă descriere a temei alese, ce v-ați propus să implementați
+3. **Ticket Purchasing**
+   - Select a movie and a showtime
+   - Choose a seat (seat availability is tracked)
+   - Apply discounts based on user category (e.g., student or senior)
 
-## Tema 1
+4. **User Categories**
+   - Students and seniors can validate their category
+   - Discounts are applied automatically for validated users
 
-#### Cerințe
-- [X] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi
-- [X] constructori de inițializare
-- [X] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor
-<!-- - [ ] pentru o altă clasă: constructor de mutare, `operator=` de mutare, destructor -->
-<!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
-- [X] `operator<<` pentru toate clasele pentru afișare (std::ostream)
-- [X] cât mai multe `const` (unde este cazul)
-- [X] implementarea a minim 3 funcții membru publice pentru funcționalități specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
-  - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
-- [X] scenariu de utilizare a claselor definite:
-  - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
-  - vor fi adăugate în fișierul `tastatura.txt` DOAR exemple de date de intrare de la tastatură (dacă există); dacă aveți nevoie de date din fișiere, creați alte fișiere separat
-- [X] tag de `git`: de exemplu `v0.1`
-- [X] serviciu de integrare continuă (CI); exemplu: GitHub Actions
+5. **Balance Management**
+   - Add funds to user balance via Card or PayPal
+   - View transaction history
+   - Ensure sufficient funds before purchasing tickets
 
-## Tema 2
+6. **Payment Integration**
+   - Simulated payments using Card or PayPal
+   - Input validation for card number, CVV, and PayPal credentials
 
-#### Cerințe
-- [ ] separarea codului din clase în `.h` (sau `.hpp`) și `.cpp`
-- [ ] moșteniri:
-  - minim o clasă de bază și **3 clase derivate**
-  - ierarhia trebuie să fie cu bază proprie, nu derivată dintr-o clasă predefinită
-  - [ ] clasă cu atribut de tip pointer la o clasă de bază cu derivate
-  - [ ] funcții virtuale (pure) apelate prin pointeri de bază din clasa care conține atributul de tip pointer de bază
-    - minim o funcție virtuală va fi **specifică temei** (e.g. nu simple citiri/afișări)
-    - constructori virtuali (clone): sunt necesari, dar nu se consideră funcții specifice temei
-  - [ ] apelarea constructorului din clasa de bază din constructori din derivate
-  - [ ] smart pointers (recomandat, opțional)
-  - [ ] `dynamic_cast`/`std::dynamic_pointer_cast` pentru downcast cu sens
-- [ ] suprascris cc/op= pentru copieri/atribuiri corecte, copy and swap
-- [ ] excepții
-  - [ ] ierarhie proprie cu baza `std::exception` sau derivată din `std::exception`; minim **3** clase pentru erori specifice
-  - [ ] utilizare cu sens: de exemplu, `throw` în constructor (sau funcție care întoarce un obiect), `try`/`catch` în `main`
-- [ ] funcții și atribute `static`
-- [ ] STL
-- [ ] cât mai multe `const`
-- [ ] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate**
-  - noua derivată nu poate fi una existentă care a fost ștearsă și adăugată din nou
-- [ ] tag de `git`: de exemplu `v0.2`
+---
 
-## Tema 3
+## Technologies Used
 
-#### Cerințe
-- [ ] 2 șabloane de proiectare (design patterns)
-- [ ] o clasă șablon cu sens; minim **2 instanțieri**
-  - [ ] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri
-<!-- - [ ] o specializare pe funcție/clasă șablon -->
-- [ ] tag de `git`: de exemplu `v0.3` sau `v1.0`
+- **C++17**
+- CSV file handling with [csv.hpp](https://github.com/ben-strasser/fast-cpp-csv-parser)
+- Password hashing with **BLAKE2b**
+- Object-oriented programming (classes, inheritance, polymorphism)
+- Singleton pattern for the main application
 
-## Resurse
+---
 
-- [SFML](https://github.com/SFML/SFML/tree/2.6.1) (Zlib)
-- adăugați trimiteri către resursele externe care v-au ajutat sau pe care le-ați folosit
+## About
+
+This project was developed by Gabriel Ștefan as part of the Object-Oriented Programming course at the University of Bucharest.
